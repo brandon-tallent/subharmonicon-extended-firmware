@@ -1,0 +1,16 @@
+/build/
+/dist/
+/vendor/
+/tools/ti-cgt-*/
+__pycache__/
+*.pyc
+.DS_Store
+# Vendor updates and locally reconstructed images never belong in this repo.
+*.syx
+*.bin
+*.obj
+*.out
+*.map
+*.zip
+*.pdf
+*.tar.gz

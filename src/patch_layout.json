@@ -1,0 +1,316 @@
+{
+  "hooks": [
+    {
+      "section": ".patch_084c98",
+      "address": 543896,
+      "words": 2
+    },
+    {
+      "section": ".patch_084ca3",
+      "address": 543907,
+      "words": 2
+    },
+    {
+      "section": ".patch_085c44",
+      "address": 547908,
+      "words": 2
+    },
+    {
+      "section": ".patch_085caf",
+      "address": 548015,
+      "words": 2
+    },
+    {
+      "section": ".patch_085d82",
+      "address": 548226,
+      "words": 2
+    },
+    {
+      "section": ".patch_085d9a",
+      "address": 548250,
+      "words": 2
+    },
+    {
+      "section": ".patch_08647f",
+      "address": 550015,
+      "words": 2
+    },
+    {
+      "section": ".patch_086523",
+      "address": 550179,
+      "words": 1
+    },
+    {
+      "section": ".patch_08679e",
+      "address": 550814,
+      "words": 2
+    },
+    {
+      "section": ".patch_087024",
+      "address": 552996,
+      "words": 3
+    },
+    {
+      "section": ".patch_087428",
+      "address": 554024,
+      "words": 2
+    },
+    {
+      "section": ".patch_08744a",
+      "address": 554058,
+      "words": 2
+    },
+    {
+      "section": ".patch_08763d",
+      "address": 554557,
+      "words": 1
+    },
+    {
+      "section": ".patch_087640",
+      "address": 554560,
+      "words": 1
+    },
+    {
+      "section": ".patch_087646",
+      "address": 554566,
+      "words": 1
+    },
+    {
+      "section": ".patch_087659",
+      "address": 554585,
+      "words": 1
+    },
+    {
+      "section": ".patch_08765f",
+      "address": 554591,
+      "words": 1
+    },
+    {
+      "section": ".patch_08766c",
+      "address": 554604,
+      "words": 2
+    },
+    {
+      "section": ".patch_08768e",
+      "address": 554638,
+      "words": 2
+    },
+    {
+      "section": ".patch_0876a9",
+      "address": 554665,
+      "words": 2
+    },
+    {
+      "section": ".patch_0876c3",
+      "address": 554691,
+      "words": 2
+    },
+    {
+      "section": ".patch_087aa6",
+      "address": 555686,
+      "words": 1
+    },
+    {
+      "section": ".patch_087aae",
+      "address": 555694,
+      "words": 1
+    },
+    {
+      "section": ".patch_087ab6",
+      "address": 555702,
+      "words": 1
+    },
+    {
+      "section": ".patch_087abe",
+      "address": 555710,
+      "words": 1
+    },
+    {
+      "section": ".patch_087b0f",
+      "address": 555791,
+      "words": 1
+    },
+    {
+      "section": ".patch_087b10",
+      "address": 555792,
+      "words": 1
+    },
+    {
+      "section": ".patch_087b18",
+      "address": 555800,
+      "words": 1
+    },
+    {
+      "section": ".patch_087b19",
+      "address": 555801,
+      "words": 1
+    },
+    {
+      "section": ".patch_087b21",
+      "address": 555809,
+      "words": 1
+    },
+    {
+      "section": ".patch_087b22",
+      "address": 555810,
+      "words": 1
+    },
+    {
+      "section": ".patch_087b29",
+      "address": 555817,
+      "words": 1
+    },
+    {
+      "section": ".patch_087b2a",
+      "address": 555818,
+      "words": 1
+    },
+    {
+      "section": ".patch_0892ac",
+      "address": 561836,
+      "words": 2
+    },
+    {
+      "section": ".patch_089316",
+      "address": 561942,
+      "words": 7
+    },
+    {
+      "section": ".patch_089ff4",
+      "address": 565236,
+      "words": 2
+    },
+    {
+      "section": ".patch_08a3d3",
+      "address": 566227,
+      "words": 2
+    },
+    {
+      "section": ".patch_08b0bc",
+      "address": 569532,
+      "words": 2
+    },
+    {
+      "section": ".patch_08b1a4",
+      "address": 569764,
+      "words": 2
+    },
+    {
+      "section": ".patch_08b1a6",
+      "address": 569766,
+      "words": 2
+    },
+    {
+      "section": ".patch_08b1bd",
+      "address": 569789,
+      "words": 2
+    },
+    {
+      "section": ".patch_08b27d",
+      "address": 569981,
+      "words": 2
+    },
+    {
+      "section": ".patch_08b2c3",
+      "address": 570051,
+      "words": 4
+    },
+    {
+      "section": ".patch_08bfb5",
+      "address": 573365,
+      "words": 1
+    },
+    {
+      "section": ".patch_08d0d5",
+      "address": 577749,
+      "words": 2
+    },
+    {
+      "section": ".patch_08e0ea",
+      "address": 581866,
+      "words": 2
+    },
+    {
+      "section": ".patch_08e169",
+      "address": 581993,
+      "words": 2
+    },
+    {
+      "section": ".patch_0903b3",
+      "address": 590771,
+      "words": 2
+    },
+    {
+      "section": ".patch_0903d1",
+      "address": 590801,
+      "words": 2
+    },
+    {
+      "section": ".patch_0904b0",
+      "address": 591024,
+      "words": 2
+    },
+    {
+      "section": ".patch_090bd8",
+      "address": 592856,
+      "words": 2
+    },
+    {
+      "section": ".patch_090bda",
+      "address": 592858,
+      "words": 2
+    },
+    {
+      "section": ".patch_09110f",
+      "address": 594191,
+      "words": 2
+    },
+    {
+      "section": ".patch_0919f6",
+      "address": 596470,
+      "words": 2
+    },
+    {
+      "section": ".patch_091b01",
+      "address": 596737,
+      "words": 3
+    },
+    {
+      "section": ".patch_092005",
+      "address": 598021,
+      "words": 2
+    },
+    {
+      "section": ".patch_092ac5",
+      "address": 600773,
+      "words": 3
+    },
+    {
+      "section": ".patch_0943df",
+      "address": 607199,
+      "words": 1
+    },
+    {
+      "section": ".patch_0946ee",
+      "address": 607982,
+      "words": 5
+    },
+    {
+      "section": ".patch_0946f6",
+      "address": 607990,
+      "words": 4
+    },
+    {
+      "section": ".patch_0946fd",
+      "address": 607997,
+      "words": 4
+    },
+    {
+      "section": ".patch_09477e",
+      "address": 608126,
+      "words": 512
+    }
+  ],
+  "extension_start": 608638,
+  "extension_end": 655344
+}
