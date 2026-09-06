@@ -7,6 +7,19 @@ shackles and makes different uses of them for each mode.
 * New midi features: 6 voices (in paraphonic mode), midi velocity, 303 style glide, CC over rhythm knobs
 * Alternate rhythm mode that plays a selection from a library of 32 64 step gate patterns and allows indpendent triggering of VCA and VCF envelopes. 
 
+## Quick Start
+
+if you just want to install the custom firmware on your module, grab
+Subharmonicon firmware 1.1.1 from Moog's download site, then run
+
+```sh
+curl -LO https://github.com/brandon-tallent/subharmonicon-extended-firmware/releases/latest/download/subharmonicon.subhpatch
+python3 patcher.py /path/to/Subharmonicon_Firmware_v1_1_1.syx \
+  subharmonicon.subhpatch -o subharmonicon-custom.syx
+```
+
+Flash the subharmonicon with the resulting syx file per the manual instructions.
+
 ## Building from source
 
 first:  
@@ -35,19 +48,6 @@ make release C2000_CGT_ROOT=/path/to/ti-cgt-c2000_25.11.1.LTS
 - `src/features*.c` feature headers
 - `src/features_bridge.asm` and `src/features_rhythm_bridge.asm` ABI adaptors
 - `src/patches.asm` replacement hooks. `src/stock_abi.inc` address/offsets; external routine addresses live in `src/extension_link.cmd`.
-
-## Patching existing firmware without build tools 
-
-if you just want to install the custom firwmare on your module, download `subharmonicon.subhpatch` from the
-[latest GitHub release](../../releases/latest).
-
-then run
-```sh
-python3 patcher.py /path/to/Subharmonicon_Firmware_v1_1_1.syx \
-  /path/to/subharmonicon.subhpatch -o subharmonicon-custom.syx
-```
-
-FLash the subharmonicon with the resulting syx file per the manual instructions. 
 
 ## License
 
