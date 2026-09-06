@@ -7,6 +7,9 @@ shackles and makes different uses of them for each mode.
 * New midi features: 6 voices (in paraphonic mode), midi velocity, 303 style glide, CC over rhythm knobs
 * Alternate rhythm mode that plays a selection from a library of 32 64 step gate patterns and allows indpendent triggering of VCA and VCF envelopes. 
 
+See [FEATURES.md](FEATURES.md) for details and the
+[cheat sheet](https://brandon-tallent.github.io/subharmonicon-extended-firmware/) for a quick reference.
+
 ## Quick Start
 
 if you just want to install the custom firmware on your module, grab
