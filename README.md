@@ -12,13 +12,28 @@ See [FEATURES.md](FEATURES.md) for details and the
 
 ## Quick Start
 
-Open the [browser patcher](https://brandon-tallent.github.io/subharmonicon-extended-firmware/).
-Download Moog's firmware 1.1.1, unzip it, and choose
-`Subharmonicon_Firmware_v1_1_1.syx`. The modified SysEx downloads automatically;
-your original file never leaves your browser. Install the result using the
-update instructions included in Moog's download.
+**[Open the firmware patcher](https://brandon-tallent.github.io/subharmonicon-extended-firmware/)**
+— no building or command-line tools required to create the modified firmware.
 
-You can also apply a release patch locally:
+1. Download **Subharmonicon Firmware v1.1.1** from
+   [Moog's downloads page](https://www.moogmusic.com/downloads/?product=Subharmonicon)
+   and unzip it.
+2. Open the patcher above and select `Subharmonicon_Firmware_v1_1_1.syx`.
+   Choose the firmware file, not the ZIP, erase, or invalidate file.
+3. The modified firmware downloads automatically as `subharmonicon-custom.syx`.
+4. Follow the update instructions included in Moog's download, using
+   `subharmonicon-custom.syx` in place of the official firmware file. Keep using
+   Moog's supplied invalidate and erase files as instructed.
+
+Your firmware stays in your browser; nothing is uploaded. To use the patcher
+offline, click **Save this tool for offline use** on the page, then open the
+downloaded HTML file in a current browser.
+
+### Command-line alternative
+
+Download `subharmonicon.subhpatch` from the
+[latest release](https://github.com/brandon-tallent/subharmonicon-extended-firmware/releases/latest)
+and run this command from a copy of this repository:
 
 ```sh
 python3 patcher.py /path/to/Subharmonicon_Firmware_v1_1_1.syx \
