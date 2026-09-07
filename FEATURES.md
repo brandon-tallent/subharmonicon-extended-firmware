@@ -130,18 +130,30 @@ With PLAY stopped, hold **SEQ 1 SUB1 + SUB2 for one second**, then release.
   amount, span alternates ±1/±2 octaves, pitch mode cycles all four modes.
 - **NEXT / RESET:** increase/decrease value; on glide, adjust time.
 - **SEQ OCT:** toggle fine/coarse adjustment within settings. Spread and velocity
-  use steps 1/16; glide time uses 128/1024. Discrete choices use one step.
+  use steps 1/16. Glide coarse steps select approximately 10, 22, 50, 100,
+  200, 500, 1000, or 2000 ms; fine steps adjust the 14-bit time by 128.
+  Discrete choices use one step.
 - **PLAY:** save and exit without starting playback; 30 seconds idle also exits.
 
 The selected page blinks at 2 Hz (all four QUANTIZE LEDs for tuning span); SEQ1 step LEDs show a steady coarse value and
-SEQ2 step LEDs stay off. On the mode page, zero/one/two/three LEDs mean Normal /
+SEQ2 step LEDs stay off except on the glide page. Glide uses all eight LEDs
+(SEQ1 then SEQ2) to show the nearest time preset; the default 22 ms lights two.
+EG indicates whether glide is enabled, independently of its remembered time.
+These times are RC time constants, not a fixed duration to reach the target.
+On the mode page, zero/one/two/three LEDs mean Normal /
 Paraphonic / Harmony / Morph. Settings owns these LEDs; clock refresh is suppressed and
 old blink/timeout state is cleared. On exit both sequencers' displays return.
 Entry assignments are restored. The both-SUB2 paraphonic shortcut is removed.
 Stock both-OSC Fine Tune and both-SUB1 calibration remain.
 
-All six pitches follow QUANTIZE in paraphonic mode. Noon is the remembered note,
-with a small tuning deadband; pitch knobs span ±1 or ±2 octaves. Sequence octave
+All six pitches follow QUANTIZE in paraphonic mode. Each Note On allocates one
+source; unallocated sources use a neutral middle-C anchor. Note Off snaps only
+its still-owned source back to that anchor, preserving knob and sequencer offsets.
+A stolen note's later Note Off leaves its replacement untouched. Entering
+Paraphonic and All Notes/Sound Off restore all six anchors to neutral.
+The shared VCA can make this return audible during the envelope release tail.
+Noon is the allocated note, or middle C when free, with a small tuning deadband;
+pitch knobs span ±1 or ±2 octaves. Sequence octave
 range remains a separate control. MIDI glide applies to overlapping notes,
 without envelope retrigger; separate articulations snap. Internal sequencer slide
 links are not implemented. Velocity affects the shared VCA, hence the whole chord.
@@ -188,7 +200,11 @@ CC114 = 3 selects it temporarily; `tools/feature_config.py mode morph` creates
 the persistent setting.
 
 - **VCO1 / VCO2 FREQ:** parent pitch, with Paraphonic tuning.
-  MIDI allocates the two main VCOs and two SUB2s; SUB1 follows its parent.
+  Every MIDI Note On sets the pitch anchor for VCO1 and VCO2 together,
+  preserving their individual tuning offsets. SUB2 modulation rates are
+  independent of incoming notes; SUB1 retains its parent-following timing.
+  The latest Note On remains the anchor after Note Off. Overlapping notes glide
+  when enabled; separate articulations snap.
 - **Each SUB1 FREQ:** continuous shape scan: even → alternating → Brake
   → Accelerate → double burst → triple burst → irregular →
   single cluster. CC103/105 match the knobs; whichever moves last owns shape.

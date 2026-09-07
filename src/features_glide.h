@@ -19,6 +19,38 @@ static float glide_time_us(uint16_t value)
     return 10000.0f+1990000.0f*unit*unit;
 }
 
+/* Panel presets approximate 10, 22, 50, 100, 200, 500, 1000, 2000 ms.
+ * Keep the existing wire/storage law: zero remains the exact 22-ms default.
+ * Resolve that alias before panel arithmetic, and never decrement into it. */
+static const uint16_t glide_panel_presets[8]={1,1272,2323,3484,5062,8130,11555,16383};
+
+static inline uint16_t glide_panel_adjust(uint16_t value, uint16_t fine, uint16_t up)
+{
+    uint16_t i;
+    if(!value) value=glide_panel_presets[1];
+    if(fine) {
+        if(up) return value>16383-128 ? 16383 : value+128;
+        return value<=128 ? 1 : value-128;
+    }
+    if(up) {
+        for(i=0;i<8;++i) if(glide_panel_presets[i]>value) return glide_panel_presets[i];
+        return 16383;
+    }
+    for(i=8;i>0;--i) if(glide_panel_presets[i-1]<value) return glide_panel_presets[i-1];
+    return 1;
+}
+
+/* Nearest preset on the curved time control; at least one LED even at minimum.
+ * The complete bar spans SEQ1 then SEQ2. EG separately reports enable state. */
+static inline uint16_t glide_panel_level(uint16_t value)
+{
+    uint16_t i;
+    if(!value) value=glide_panel_presets[1];
+    for(i=1;i<8;++i)
+        if(value<(glide_panel_presets[i-1]+glide_panel_presets[i])/2) return i;
+    return 8;
+}
+
 /* Compute only on a time change. dt/tau <= .02; fourth-order expansion
  * avoids cancellation in 1-exp(-x) and needs no general-purpose exp(). */
 static float glide_coefficient(float tau_us)

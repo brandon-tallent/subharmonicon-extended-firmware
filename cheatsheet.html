@@ -95,7 +95,7 @@ th { font-weight:600; }th,td { padding:.7rem .8rem .7rem 0; border-bottom:1px so
 <details class="setting"><summary><span>Rhythm type</span><span class="location">SEQ 2 · SUB1</span></summary><p>EG toggles Stock / Gate Patterns. NEXT selects Gate Patterns; RESET selects Stock.</p></details>
 <details class="setting"><summary><span>Noise</span><span class="location">SEQ 2 · SUB2</span></summary><p>EG toggles noise on VCO2 SUB2. NEXT turns it on; RESET turns it off. Use the SUB2 mixer level to blend it.</p></details>
 <details class="setting"><summary><span>Harmony spread</span><span class="location">SEQ 1 · OSC1</span></summary><p>Detunes the voices within ±30 cents. NEXT / RESET adjust the amount; EG switches between zero and the recalled amount.</p></details>
-<details class="setting"><summary><span>Glide</span><span class="location">SEQ 1 · SUB1</span></summary><p>EG turns MIDI legato glide on / off. NEXT / RESET adjust its time. Applies to overlapping MIDI notes, not internal sequence steps.</p></details>
+<details class="setting"><summary><span>Glide</span><span class="location">SEQ 1 · SUB1</span></summary><p>EG turns MIDI legato glide on / off. NEXT / RESET select roughly 10, 22, 50, 100, 200, 500, 1000, or 2000 ms; SEQ OCT enables fine adjustment. All eight step LEDs (SEQ1 then SEQ2) show the nearest time preset; the default 22 ms lights two. EG shows on / off independently. Times are RC time constants. Applies to overlapping MIDI notes, not internal sequence steps.</p></details>
 <details class="setting"><summary><span>Velocity depth</span><span class="location">SEQ 1 · SUB2</span></summary><p>NEXT / RESET adjust MIDI velocity sensitivity. EG switches between zero and the recalled depth. Affects the shared VCA.</p></details>
 <details class="setting"><summary><span>Tuning span</span><span class="location">QUANTIZE</span></summary><p>EG toggles ±1 / ±2 octaves around the remembered pitch. NEXT selects ±2; RESET selects ±1. Separate from the sequencer octave range.</p></details>
 </section>
@@ -113,9 +113,9 @@ th { font-weight:600; }th,td { padding:.7rem .8rem .7rem 0; border-bottom:1px so
 <div class="mode" id="mode-paraphonic" role="tabpanel" aria-labelledby="tab-paraphonic" tabindex="0">
 <h3>Paraphonic</h3>
 <dl class="controls">
-<div><dt>FREQ knobs</dt><dd>Each source has its own pitch. Noon is the remembered note; the knob offsets it by ±1 or ±2 octaves.</dd></div>
+<div><dt>FREQ knobs</dt><dd>Each source has its own pitch. Noon is the allocated MIDI note, or middle C when free; the knob offsets it by ±1 or ±2 octaves.</dd></div>
 <div><dt>Sequencers</dt><dd>Assignments add pitch to the selected sources. QUANTIZE applies to all six.</dd></div>
-<div><dt>MIDI</dt><dd>Notes allocate the six sources. Note Off keeps the last pitch. All sources share one filter and VCA.</dd></div>
+<div><dt>MIDI</dt><dd>Each note allocates one source. Note Off snaps that source back to its neutral middle-C anchor, retaining knob and sequencer offsets. Unallocated sources stay neutral. All sources share one filter and VCA, so the return can be audible in the release tail.</dd></div>
 </dl>
 </div>
 <div class="mode" id="mode-harmony" role="tabpanel" aria-labelledby="tab-harmony" tabindex="0">
@@ -135,6 +135,7 @@ th { font-weight:600; }th,td { padding:.7rem .8rem .7rem 0; border-bottom:1px so
 <div class="mode" id="mode-morph" role="tabpanel" aria-labelledby="tab-morph" tabindex="0">
 <h3>Morph</h3>
 <dl class="controls">
+<div><dt>MIDI</dt><dd>Each note plays VCO1 and VCO2 together, retaining their tuning offsets. SUB2 modulation rates stay independent of MIDI notes; SUB1 timing follows its parent. Note Off retains the latest pitch.</dd></div>
 <div><dt>SUB1 FREQ</dt><dd>Scans even, alternating, Brake, Accelerate, double burst, triple burst, irregular and single cluster shapes.</dd></div>
 <div><dt>SUB2 FREQ</dt><dd>Modulates SUB1 reset timing. SUB2’s mixer can stay down. Timing changes affect pitch as well as timbre.</dd></div>
 <div><dt>SUB1 assignment</dt><dd>Sequences shape. Step noon is neutral; start with SUB1 FREQ near noon.</dd></div>

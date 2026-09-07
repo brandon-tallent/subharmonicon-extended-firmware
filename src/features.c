@@ -268,7 +268,7 @@ static uint16_t feature_settings_gesture(void);
  * boundary. Node identity survives sorting and distinguishes equal pitches. */
 uint16_t feature_note_added(const volatile uint16_t *node)
 {
-    uint16_t irq,slot;
+    uint16_t irq,slot,mask;
     if(!feature_state.allocation) {
         /* The accepted node is already linked; equal sentinel next/prev
          * pointers identify the first held note of a fresh articulation. */
@@ -286,13 +286,21 @@ uint16_t feature_note_added(const volatile uint16_t *node)
         feature_harmony.root=(float)node[4];
         if(feature_state.midi_gate) feature_glide.tied_mask=63;
     }
-    slot=voices_assign_active(&feature_state.voices,feature_state.note,(uint32_t)node,
-                       node[4],node[5],node[8],feature_state.reset.morph ? 45 : 63);
+    if(feature_state.reset.morph) {
+        /* MIDI plays the two carriers together. SUB2 modulation rates keep
+         * their neutral anchor; SUB1 derives timing from its parent. */
+        feature_state.note[0]=feature_state.note[3]=(float)node[4];
+        mask=9;
+    } else {
+        slot=voices_assign(&feature_state.voices,feature_state.note,(uint32_t)node,
+                           node[4],node[5],node[8]);
+        mask=1U<<slot;
+    }
     if(!feature_state.midi_gate) {
         feature_glide.snap_mask=63;
         feature_glide.tied_mask=0;
-    } else feature_glide.tied_mask|=1U<<slot;
-    feature_state.published_mask&=~(1U<<slot);
+    } else feature_glide.tied_mask|=mask;
+    feature_state.published_mask&=~mask;
     feature_state.dirty=1;
     __restore_interrupts(irq);
     if(!feature_state.midi_gate) {
@@ -302,9 +310,28 @@ uint16_t feature_note_added(const volatile uint16_t *node)
     return 1;
 }
 
+/* Caller excludes pitch publication. Reset only the MIDI anchor; panel,
+ * sequence and continuous offsets still participate in the next pitch sum. */
+static void feature_neutral_notes(uint16_t mask)
+{
+    uint16_t i;
+    for(i=0;i<6;++i) if(mask&(1U<<i)) feature_state.note[i]=60.0f;
+    feature_glide.snap_mask|=mask;
+    feature_glide.tied_mask&=~mask;
+    feature_glide.active_mask&=~mask;
+    feature_state.published_mask&=~mask;
+    feature_state.dirty=1;
+}
+
 void feature_note_deleted(const volatile uint16_t *node)
 {
-    if(feature_state.allocation) voices_release(&feature_state.voices,(uint32_t)node);
+    uint16_t irq,mask;
+    if(!feature_state.allocation) return;
+    irq=__disable_interrupts();
+    mask=voices_release(&feature_state.voices,(uint32_t)node);
+    if(mask && !feature_harmony.enabled && !feature_state.reset.morph)
+        feature_neutral_notes(mask);
+    __restore_interrupts(irq);
 }
 
 uint16_t feature_note_removed(void)
@@ -338,12 +365,15 @@ float feature_vca_velocity(float inverted)
 
 void feature_notes_reset(void)
 {
+    uint16_t irq=__disable_interrupts();
     feature_glide.snap_mask=63;
     feature_glide.tied_mask=0;
     feature_glide.active_mask=0;
-    if(!feature_state.allocation) return;
+    if(!feature_state.allocation) { __restore_interrupts(irq);return; }
     voices_clear(&feature_state.voices);
+    if(!feature_harmony.enabled && !feature_state.reset.morph) feature_neutral_notes(63);
     feature_state.midi_gate=0;
+    __restore_interrupts(irq);
     feature_close_gates(); /* Explicit All Notes/Sound Off overrides Held. */
 }
 
@@ -767,7 +797,6 @@ void feature_service(void)
         feature_noise_only=0;feature_state.reset.noise=0;
         feature_set_pitch_controls(0);
         voices_clear(&feature_state.voices);
-        feature_state.voices.initialized=0;
         for(i=0;i<6;++i) feature_state.note[i]=60.0f;
         feature_setting(4,feature_state.persisted.span,0);
         feature_setting(6,feature_state.persisted.glide_time,0);
@@ -828,6 +857,8 @@ static uint16_t feature_setting(uint16_t id, uint16_t value, uint16_t persist)
             feature_noise_only=!value && feature_state.reset.noise;
             feature_harmony.enabled=value==2;feature_harmony.valid=0;
             feature_state.reset.morph=value==3 ? 5 : 0;
+            if(value==1) feature_neutral_notes(63); /* Engine is stopped here. */
+            if(value==3) feature_state.note[2]=feature_state.note[5]=60.0f;
             if(value) feature_set_allocation(1);
             else if(feature_noise_only) feature_set_enabled(1);
             if(value && !feature_state.allocation) { feature_harmony.enabled=0;feature_state.reset.morph=0;return 0; }
@@ -1086,11 +1117,12 @@ uint16_t feature_settings_gate(void)
             }
             if(edge&((1UL<<7)|(1UL<<8))) {
                 uint16_t step=feature_settings.fine ? 1 : 16,maximum=127;
-                if(feature_settings.page==1) { id=6;step=feature_settings.fine ? 128 : 1024;maximum=16383; }
+                if(feature_settings.page==1) id=6;
                 else if(feature_settings.page==3) { step=1;maximum=3; }
                 else if(feature_settings.page==4 || feature_settings.page==5) { step=1;maximum=1; }
                 else if(feature_settings.page==6) { step=1;maximum=2; }
-                value=panel_adjust(feature_setting_value(id),step,maximum,(edge&(1UL<<7))!=0);
+                if(id==6) value=glide_panel_adjust(feature_glide.time,feature_settings.fine,(edge&(1UL<<7))!=0);
+                else value=panel_adjust(feature_setting_value(id),step,maximum,(edge&(1UL<<7))!=0);
                 if(id==4 && !value) value=1; /* Panel span has two choices, no default alias. */
                 feature_settings_edit(id,value);
             }
@@ -1106,13 +1138,12 @@ uint16_t feature_settings_gate(void)
                             feature_settings.page==6 && (now%500000UL)<250000UL);
     id=feature_settings.page==1 ? 6 : settings_ids[feature_settings.page];
     value=feature_setting_value(id);
-    if(id==6) value=value>>7;
-    else if(id==8) value=value ? 1+32*(value-1) : 0;
+    if(id==8) value=value ? 1+32*(value-1) : 0;
     else if(id==9 || id==10) value*=127;
     else if(id==4) value=value==1 ? 32 : 127;
-    for(i=0;i<4;++i)
-        feature_setting_led((volatile uint16_t *)(CONTROLS+0x800+0x22*i),value>=(i*32+1));
-    for(i=4;i<8;++i) feature_setting_led((volatile uint16_t *)(CONTROLS+0x800+0x22*i),0);
+    for(i=0;i<8;++i)
+        feature_setting_led((volatile uint16_t *)(CONTROLS+0x800+0x22*i),
+                            id==6 ? i<glide_panel_level(value) : (i<4 && value>=(i*32+1)));
     feature_setting_led((volatile uint16_t *)(CONTROLS+0xa42),feature_setting_value(settings_ids[feature_settings.page])!=0);
     feature_setting_led((volatile uint16_t *)(CONTROLS+0xa64),feature_settings.fine);
     feature_setting_led((volatile uint16_t *)(CONTROLS+0xa86),!feature_settings.fine);
