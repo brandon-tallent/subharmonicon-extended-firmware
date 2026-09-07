@@ -1,10 +1,11 @@
-name: Publish cheat sheet
+name: Publish firmware patcher and cheat sheet
 
 on:
   push:
     branches: [main]
     paths:
       - cheatsheet.html
+      - patcher.html
       - .github/workflows/pages.yml
   workflow_dispatch:
 
@@ -28,7 +29,8 @@ jobs:
       - uses: actions/configure-pages@v6
       - run: |
           mkdir _site
-          cp cheatsheet.html _site/index.html
+          cp patcher.html _site/index.html
+          cp cheatsheet.html _site/cheatsheet.html
       - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
