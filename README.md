@@ -54,6 +54,5 @@ make release C2000_CGT_ROOT=/path/to/ti-cgt-c2000_25.11.1.LTS
 
 ## License
 
-Our original work is MIT licensed. Retained third-party rhythm data has its own
-notice; see [NOTICE.md](NOTICE.md) for scope and the unresolved distribution
-question. No rights to Moog's firmware are granted by this repository.
+Our original work is MIT licensed. No rights to Moog's firmware are granted by
+this repository.
