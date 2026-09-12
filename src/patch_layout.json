@@ -216,6 +216,11 @@
       "words": 4
     },
     {
+      "section": ".patch_08b348",
+      "address": 570184,
+      "words": 2
+    },
+    {
       "section": ".patch_08bfb5",
       "address": 573365,
       "words": 1

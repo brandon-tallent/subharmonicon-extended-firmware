@@ -148,6 +148,13 @@ feature_manager_reset_hook:
         MOVL *SP++,XAR1
         ADDB SP,#6
         LB feature_manager_reset_continue
+; Keep the transport-time direct-note latch consistent with the held-note
+; manager cleared by MIDI All Sound Off / All Notes Off.
+feature_all_notes_off_hook:
+        MOVW DP,#MIDI_CONTROL_SOURCE_DP
+        MOV @MIDI_CONTROL_SOURCE_NOTE_DIRECT,#0
+        LCR release_both_envelopes
+        LRETR
 _feature_clear_notes:
         MOVL XAR4,#MIDI_NOTE_MANAGER_SINGLETON
         LCR reset_midi_note_manager_state

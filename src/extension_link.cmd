@@ -45,6 +45,7 @@ MEMORY
   P08b1bd: origin=0x08b1bd, length=0x2
   P08b27d: origin=0x08b27d, length=0x2
   P08b2c3: origin=0x08b2c3, length=0x4
+  P08b348: origin=0x08b348, length=0x2
   P08bfb5: origin=0x08bfb5, length=0x1
   P08d0d5: origin=0x08d0d5, length=0x2
   P08e0ea: origin=0x08e0ea, length=0x2
@@ -159,6 +160,7 @@ SECTIONS
  .patch_08b1bd: > P08b1bd, PAGE=0
  .patch_08b27d: > P08b27d, PAGE=0
  .patch_08b2c3: > P08b2c3, PAGE=0
+ .patch_08b348: > P08b348, PAGE=0
  .patch_08bfb5: > P08bfb5, PAGE=0
  .patch_08d0d5: > P08d0d5, PAGE=0
  .patch_08e0ea: > P08e0ea, PAGE=0

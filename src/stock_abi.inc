@@ -75,6 +75,8 @@ MIDI_CC_LEGATO_FOOTSWITCH                            .set 0x44
 MIDI_DEVICE_ID_CONFIG_DP                             .set 0x30e
 MIDI_DEVICE_ID_DIRECT                                .set 0x3c
 MIDI_DISPATCH_CONTEXT_SINGLETON                      .set 0xc300
+MIDI_CONTROL_SOURCE_DP                               .set 0x030a
+MIDI_CONTROL_SOURCE_NOTE_DIRECT                      .set 0x38
 MIDI_NOTE_MANAGER_SINGLETON                          .set 0xc040
 MIDI_SYSEX_BROADCAST_DEVICE_ID                       .set 0x7f
 MIDI_SYSEX_CAPTURE_COUNT_OFFSET                      .set 0x1a
