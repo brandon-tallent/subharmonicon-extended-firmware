@@ -176,6 +176,11 @@
       "words": 7
     },
     {
+      "section": ".patch_089752",
+      "address": 563026,
+      "words": 2
+    },
+    {
       "section": ".patch_089ff4",
       "address": 565236,
       "words": 2
@@ -214,6 +219,11 @@
       "section": ".patch_08b2c3",
       "address": 570051,
       "words": 4
+    },
+    {
+      "section": ".patch_08b2bd",
+      "address": 570045,
+      "words": 2
     },
     {
       "section": ".patch_08b348",

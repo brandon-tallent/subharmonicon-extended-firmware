@@ -37,6 +37,7 @@ MEMORY
   P087b2a: origin=0x087b2a, length=0x1
   P0892ac: origin=0x0892ac, length=0x2
   P089316: origin=0x089316, length=0x7
+  P089752: origin=0x089752, length=0x2
   P089ff4: origin=0x089ff4, length=0x2
   P08a3d3: origin=0x08a3d3, length=0x2
   P08b0bc: origin=0x08b0bc, length=0x2
@@ -45,6 +46,7 @@ MEMORY
   P08b1bd: origin=0x08b1bd, length=0x2
   P08b27d: origin=0x08b27d, length=0x2
   P08b2c3: origin=0x08b2c3, length=0x4
+  P08b2bd: origin=0x08b2bd, length=0x2
   P08b348: origin=0x08b348, length=0x2
   P08bfb5: origin=0x08bfb5, length=0x1
   P08d0d5: origin=0x08d0d5, length=0x2
@@ -152,6 +154,7 @@ SECTIONS
  .patch_087b2a: > P087b2a, PAGE=0
  .patch_0892ac: > P0892ac, PAGE=0
  .patch_089316: > P089316, PAGE=0
+ .patch_089752: > P089752, PAGE=0
  .patch_089ff4: > P089ff4, PAGE=0
  .patch_08a3d3: > P08a3d3, PAGE=0
  .patch_08b0bc: > P08b0bc, PAGE=0
@@ -160,6 +163,7 @@ SECTIONS
  .patch_08b1bd: > P08b1bd, PAGE=0
  .patch_08b27d: > P08b27d, PAGE=0
  .patch_08b2c3: > P08b2c3, PAGE=0
+ .patch_08b2bd: > P08b2bd, PAGE=0
  .patch_08b348: > P08b348, PAGE=0
  .patch_08bfb5: > P08bfb5, PAGE=0
  .patch_08d0d5: > P08d0d5, PAGE=0

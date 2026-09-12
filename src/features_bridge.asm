@@ -148,12 +148,31 @@ feature_manager_reset_hook:
         MOVL *SP++,XAR1
         ADDB SP,#6
         LB feature_manager_reset_continue
+; A matching Note Off owns the running-transport transpose latch even though
+; stock has no held-note node for it. Preserve the replaced XAR4 setup.
+feature_note_off_hook:
+        MOVW DP,#MIDI_CONTROL_SOURCE_DP
+        MOV AL,@MIDI_CONTROL_SOURCE_NOTE_DIRECT
+        CMP AL,@AR6
+        SB feature_note_off_preserve_latch,NEQ
+        MOV @MIDI_CONTROL_SOURCE_NOTE_DIRECT,#0
+feature_note_off_preserve_latch:
+        MOVL XAR4,@XAR3
+        MOV AL,@AR6
+        LRETR
+; Transport Stop terminates the lifetime of its transpose source. Preserve the
+; replaced DP setup for the remaining stock transport-input checks.
+feature_midi_stop_hook:
+        MOVW DP,#MIDI_CONTROL_SOURCE_DP
+        MOV @MIDI_CONTROL_SOURCE_NOTE_DIRECT,#0
+        MOVW DP,#MIDI_INPUT_CONFIG_DP
+        LRETR
 ; Keep the transport-time direct-note latch consistent with the held-note
 ; manager cleared by MIDI All Sound Off / All Notes Off.
 feature_all_notes_off_hook:
         MOVW DP,#MIDI_CONTROL_SOURCE_DP
         MOV @MIDI_CONTROL_SOURCE_NOTE_DIRECT,#0
-        LCR release_both_envelopes
+        LCR _feature_close_gates
         LRETR
 _feature_clear_notes:
         MOVL XAR4,#MIDI_NOTE_MANAGER_SINGLETON

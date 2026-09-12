@@ -135,9 +135,15 @@
         LB feature_note_route_hook
         NOP
         NOP
+        .sect ".patch_08b2bd"
+        .retain
+        LCR feature_note_off_hook
         .sect ".patch_08b348"
         .retain
         LCR feature_all_notes_off_hook
+        .sect ".patch_089752"
+        .retain
+        LCR feature_midi_stop_hook
         .sect ".patch_08bfb5"
         .retain
         .word 0x9a17 ; 24-PPQN clock rate index (MOVB AL immediate)
