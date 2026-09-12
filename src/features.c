@@ -744,9 +744,21 @@ static void feature_set_enabled(uint16_t enabled)
 
 static void feature_set_allocation(uint16_t enabled)
 {
+    uint16_t irq;
     if(enabled==feature_state.allocation) return;
     feature_clear_notes();
     feature_close_gates();
+    if(enabled) {
+        /* Enabling a MIDI voice mode is a fresh articulation boundary. A
+         * restored/stale panel Held word must not reopen the VCA before the
+         * first Note On; return the panel to ordinary EG retriggering. */
+        irq=__disable_interrupts();
+        REG16(CONTROLS+0xd27)=0;
+        REG16(ENGINE+0xae1)=1;
+        REG16(ENGINE+0xade)=0;
+        REG16(ENGINE+0xadf)=0;
+        __restore_interrupts(irq);
+    }
     if(enabled) feature_set_enabled(1);
     if(enabled && !feature_state.enabled) return;
     voices_clear(&feature_state.voices);
