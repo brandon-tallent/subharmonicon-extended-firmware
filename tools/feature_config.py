@@ -4,15 +4,16 @@
 mode: normal, paraphonic, harmony, morph. rhythm: stock, patterns.
 spread and velocity-depth: 0..127. glide and noise: 0/1. span: default, 12, 24.
 glide-time: 0..16383; zero selects the documented default.
+midi-vcf: 0 couples MIDI envelopes, 1 triggers VCF on the next channel.
 """
 import argparse
 from pathlib import Path
 
 def encode_config(setting,value,unit=127):
     if not isinstance(unit,int) or not 0<=unit<=127:raise ValueError('unit must be 0..127')
-    if setting in ('glide','noise'):
+    if setting in ('glide','noise','midi-vcf'):
         if str(value) not in ('0','1'):raise ValueError('toggle must be 0 or 1')
-        ident,raw=5 if setting=='glide' else 10,int(value)
+        ident,raw={'glide':5,'noise':10,'midi-vcf':11}[setting],int(value)
     elif setting=='mode':
         values={'normal':0,'paraphonic':1,'harmony':2,'morph':3,'3':3,'0':0,'1':1,'2':2}
         if str(value) not in values:raise ValueError('mode must be normal, paraphonic, harmony, or morph')
@@ -40,7 +41,7 @@ def encode_config(setting,value,unit=127):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('setting',choices=('spread','span','glide','glide-time','velocity-depth','mode','rhythm','noise'));p.add_argument('value')
+    p.add_argument('setting',choices=('spread','span','glide','glide-time','velocity-depth','mode','rhythm','noise','midi-vcf'));p.add_argument('value')
     p.add_argument('--unit',type=int,default=127);p.add_argument('--output',type=Path,required=True)
     a=p.parse_args()
     try:wire=encode_config(a.setting,a.value,a.unit)

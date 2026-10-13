@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="New features guide for the Tallent Edition, an unofficial firmware extension for the Moog Subharmonicon.">
+<meta name="theme-color" content="#fafaf8">
+<title>Subharmonicon Tallent Edition: New Features Guide</title>
+<style>
+:root { color-scheme:light; --paper:#fafaf8; --ink:#202523; --muted:#535d57; --line:#d4d9d4; --accent:#285d48; --tip:#8a5a00; --screen:16rem; }
+* { box-sizing:border-box; }
+html { scroll-padding-top:1.5rem; }
+body { margin:0; background:var(--paper); color:var(--ink); font:1.125rem/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+.layout { max-width:40rem; margin:0 auto; padding:clamp(2rem,8vw,5rem) 1.25rem 4rem; }
+a { color:var(--accent); text-underline-offset:.2em; }
+a:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+p, ol, ul, dl, table { margin:0 0 1.25rem; }
+
+header .kind { margin:0 0 .75rem; color:var(--muted); font-weight:600; }
+h1 { font-size:clamp(2rem,6vw,2.75rem); line-height:1.12; letter-spacing:-.035em; font-weight:650; margin:0 0 1.5rem; }
+header .about { color:var(--muted); }
+.tour { display:flex; flex-wrap:wrap; gap:1.25rem 1.5rem; margin:2rem 0 0; padding:0; list-style:none; }
+.tour a { display:block; color:var(--muted); font-size:.875rem; text-decoration:none; }
+.tour a:hover { color:var(--accent); }
+.tour { gap:1.25rem; }
+.tour svg { display:block; width:8.75rem; height:auto; margin-bottom:.4rem; }
+
+nav { margin:2.5rem 0 0; padding:1.5rem 0; border-block:1px solid var(--line); font-size:1rem; }
+nav h2 { margin:0 0 .75rem; font-size:.875rem; font-weight:600; color:var(--muted); }
+nav ol { margin:0; padding:0; list-style:none; }
+nav li { margin:0; padding:0; }
+nav > ol > li { margin-bottom:.75rem; }
+nav > ol > li:last-child { margin-bottom:0; }
+nav a { display:block; padding:.15rem 0; color:var(--ink); font-weight:600; text-decoration:none; }
+nav ol ol a { color:var(--muted); font-weight:400; }
+nav ol ol ol { padding-left:1rem; }
+nav a:hover { color:var(--accent); text-decoration:underline; }
+
+main h2 { margin:4.5rem 0 1.25rem; padding-top:2rem; border-top:1px solid var(--line); font-size:1.875rem; line-height:1.2; letter-spacing:-.025em; font-weight:650; }
+main > h2:first-child { margin-top:3rem; padding-top:0; border-top:0; }
+h3 { margin:3rem 0 .9rem; font-size:1.375rem; line-height:1.3; letter-spacing:-.015em; font-weight:650; }
+h4 { margin:2.25rem 0 .6rem; font-size:1.125rem; line-height:1.4; font-weight:650; }
+h3 + h4 { margin-top:1.25rem; }
+li { margin-bottom:.5rem; padding-left:.25rem; }
+ol, ul { padding-left:1.4rem; }
+li::marker { color:var(--muted); }
+b { font-weight:650; }
+
+/* A panel button, and a file or message name. */
+kbd { font:inherit; font-size:.9em; font-weight:600; padding:.08em .4em .1em; background:#fff; border:1px solid #c3cac4; border-bottom-width:2px; border-radius:.3rem; white-space:nowrap; }
+samp { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.88em; overflow-wrap:anywhere; }
+
+/* A panel drawing beside the paragraphs that describe it. */
+.screen { display:grid; grid-template-columns:minmax(0,1fr) var(--screen); gap:0 1.75rem; align-items:start; margin-bottom:1.25rem; }
+.screen figure { grid-column:2; grid-row:1; margin:.3rem 0 0; }
+.screen > div { grid-column:1; grid-row:1; }
+.screen > div > :last-child { margin-bottom:0; }
+.screen + .screen { margin-top:1.75rem; }
+figcaption { margin-top:.5rem; color:var(--muted); font-size:.875rem; }
+
+/* Panel drawings. Lit LEDs and buttons, and the notes on what a control
+   does here, are in the accent colour. */
+figure.panel { margin:1.75rem 0; overflow-x:auto; }
+svg.pn { display:block; max-width:100%; height:auto; }
+figure.panel > svg.pn { min-width:31rem; }
+.pn .fr { fill:#fff; stroke:var(--line); stroke-width:.7; }
+.pn .l, .pn .ld, .pn .la { fill:none; stroke:var(--ink); stroke-width:.7; }
+.pn .ld { stroke:var(--line); stroke-dasharray:2 2.5; }
+.pn .la { stroke:var(--accent); }
+.pn .off, .pn .in { fill:#fff; stroke:var(--ink); stroke-width:.7; }
+.pn .hot { fill:#e3ede7; stroke:var(--accent); stroke-width:1.5; }
+.pn .on { fill:var(--accent); stroke:var(--accent); stroke-width:.7; }
+.pn .cap { fill:#fff; stroke:var(--ink); }
+.pn .ptr { fill:none; stroke:var(--ink); stroke-width:1.5; stroke-linecap:round; }
+.pn .wave { fill:none; stroke:var(--accent); stroke-width:1.2; stroke-linejoin:round; }
+.pn text { font:700 7px "DIN Condensed","Avenir Next Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif; letter-spacing:.05em; fill:var(--ink); text-anchor:middle; }
+.pn text.s { text-anchor:start; }
+.pn text.e { text-anchor:end; }
+.pn .lt { fill:#fff; }
+.pn .an { fill:var(--accent); font-size:7.6px; }
+.pn .an2 { fill:var(--muted); font:500 6.4px system-ui,sans-serif; letter-spacing:0; }
+.pn .in-knob { font-size:10px; }
+.set { display:flex; flex-wrap:wrap; gap:1.25rem; margin:1.75rem 0; }
+.set figure { margin:0; }
+.set figcaption { margin-top:.35rem; color:var(--ink); }
+
+/* The gate patterns: a row to a bar, a square to a sixteenth note. */
+.patterns { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.5rem 2rem; margin:1.75rem 0; }
+.patterns figure { margin:0; break-inside:avoid; }
+.patterns figcaption { margin:0 0 .4rem; color:var(--ink); }
+.patterns b { display:inline-block; min-width:1.6rem; color:var(--muted); font-weight:600; font-variant-numeric:tabular-nums; }
+svg.pat { display:block; width:100%; height:auto; }
+.gc { fill:#e7eae4; }
+.gh { fill:var(--accent); }
+
+/* Fields and features: a name and what it does. */
+dl > div { display:grid; grid-template-columns:7rem minmax(0,1fr); gap:0 1.25rem; padding:.8rem 0; border-bottom:1px solid var(--line); }
+dl > div:first-child { border-top:1px solid var(--line); }
+dl.wide > div { grid-template-columns:11.5rem minmax(0,1fr); }
+dt { font-weight:650; }
+dd { margin:0; }
+dd > :last-child { margin-bottom:0; }
+dd ul { margin-top:.6rem; }
+
+.note { margin:1.75rem 0; padding:.1rem 0 .1rem 1.1rem; border-left:3px solid var(--accent); }
+.note b:first-child { display:block; margin-bottom:.15rem; color:var(--accent); font-size:.875rem; }
+.note.tip { border-color:var(--tip); }
+.note.tip b:first-child { color:var(--tip); }
+
+table { width:100%; border-collapse:collapse; text-align:left; }
+th, td { padding:.7rem 1.25rem .7rem 0; border-bottom:1px solid var(--line); vertical-align:top; }
+tr:first-child > * { border-top:1px solid var(--line); }
+th { width:11.5rem; font-weight:650; }
+td { padding-right:0; }
+thead th { width:auto; color:var(--muted); font-size:.875rem; font-weight:600; }
+table.cc th:first-child, table.cc td:first-child { width:5.5rem; white-space:nowrap; font-variant-numeric:tabular-nums; }
+table.cc td:nth-child(2) { width:11rem; padding-right:1.25rem; font-weight:650; }
+svg.leds { display:inline-block; width:4.75rem; height:auto; margin-right:.4rem; vertical-align:-.4rem; }
+.leds .off { stroke-width:1; }
+dl.keys > div { grid-template-columns:9.5rem minmax(0,1fr); }
+table.keys th { width:14rem; font-weight:400; }
+table.keys thead th { font-weight:600; }
+.leds .fr { stroke:none; fill:none; }
+
+footer { margin-top:4.5rem; padding-top:1.5rem; border-top:1px solid var(--line); color:var(--muted); font-size:.875rem; }
+footer p { margin-bottom:.6rem; }
+.address { overflow-wrap:anywhere; }
+
+@media (max-width:36rem) {
+  .screen { display:block; }
+  .screen figure { margin:0 0 1.25rem; }
+  .screen > div > :last-child { margin-bottom:1.25rem; }
+  dl > div, dl.wide > div { display:block; }
+  dt { margin-bottom:.2rem; }
+  th { width:40%; }
+  .patterns { grid-template-columns:1fr; }
+  table.cc td:nth-child(2) { width:auto; }
+}
+@media (min-width:68rem) {
+  .layout { display:grid; grid-template-columns:13rem minmax(0,40rem); grid-template-areas:"nav header" "nav main" "nav footer"; gap:0 4.5rem; justify-content:center; max-width:none; }
+  header { grid-area:header; }
+  main { grid-area:main; }
+  main > h2:first-child { margin-top:3.5rem; padding-top:2rem; border-top:1px solid var(--line); }
+  footer { grid-area:footer; }
+  nav { grid-area:nav; position:sticky; top:1.5rem; align-self:start; max-height:calc(100vh - 1.5rem); overflow-y:auto; margin:0; padding:.35rem 0 2rem; border:0; font-size:.9375rem; }
+}
+@media print {
+  html { font-size:9.4pt; }
+  body { background:none; }
+  .layout { display:block; max-width:none; padding:0; }
+  nav, .tour { display:none; }
+  main h2 { break-before:page; margin-top:0; border-top:0; padding-top:0; }
+  main > h2:first-child { break-before:auto; margin-top:2rem; padding-top:0; border-top:0; }
+  h3, h4 { break-after:avoid; }
+  .screen figure, figure.panel, .set figure, .note, dl > div, tr, li { break-inside:avoid; }
+  svg { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+  figure.panel { overflow:visible; }
+  figure.panel > svg.pn { min-width:0; }
+  a { color:inherit; text-decoration:none; }
+  kbd { background:none; }
+  @page { margin:18mm 20mm; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="pg" viewBox="0 0 159.5 40.5"><path class="gc" d="M0 0h8v9h-8zM9.5 0h8v9h-8zM19 0h8v9h-8zM28.5 0h8v9h-8zM41 0h8v9h-8zM50.5 0h8v9h-8zM60 0h8v9h-8zM69.5 0h8v9h-8zM82 0h8v9h-8zM91.5 0h8v9h-8zM101 0h8v9h-8zM110.5 0h8v9h-8zM123 0h8v9h-8zM132.5 0h8v9h-8zM142 0h8v9h-8zM151.5 0h8v9h-8zM0 10.5h8v9h-8zM9.5 10.5h8v9h-8zM19 10.5h8v9h-8zM28.5 10.5h8v9h-8zM41 10.5h8v9h-8zM50.5 10.5h8v9h-8zM60 10.5h8v9h-8zM69.5 10.5h8v9h-8zM82 10.5h8v9h-8zM91.5 10.5h8v9h-8zM101 10.5h8v9h-8zM110.5 10.5h8v9h-8zM123 10.5h8v9h-8zM132.5 10.5h8v9h-8zM142 10.5h8v9h-8zM151.5 10.5h8v9h-8zM0 21h8v9h-8zM9.5 21h8v9h-8zM19 21h8v9h-8zM28.5 21h8v9h-8zM41 21h8v9h-8zM50.5 21h8v9h-8zM60 21h8v9h-8zM69.5 21h8v9h-8zM82 21h8v9h-8zM91.5 21h8v9h-8zM101 21h8v9h-8zM110.5 21h8v9h-8zM123 21h8v9h-8zM132.5 21h8v9h-8zM142 21h8v9h-8zM151.5 21h8v9h-8zM0 31.5h8v9h-8zM9.5 31.5h8v9h-8zM19 31.5h8v9h-8zM28.5 31.5h8v9h-8zM41 31.5h8v9h-8zM50.5 31.5h8v9h-8zM60 31.5h8v9h-8zM69.5 31.5h8v9h-8zM82 31.5h8v9h-8zM91.5 31.5h8v9h-8zM101 31.5h8v9h-8zM110.5 31.5h8v9h-8zM123 31.5h8v9h-8zM132.5 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></symbol></svg>
+<div class="layout">
+<header>
+<p class="kind">New Features Guide</p>
+<h1>Subharmonicon<br>Tallent Edition</h1>
+<p class="about">An unofficial firmware extension for Subharmonicon firmware 1.1.1. Not affiliated with or endorsed by Moog Music.</p>
+<ul class="tour">
+<li><a href="#gate-patterns"><svg class="pn" viewBox="0 0 112 70" width="151" height="94" aria-hidden="true"><rect class="fr" x=".5" y=".5" width="111" height="69" rx="3"/><path class="gc" d="M12.7 18.0h4.6v7.6h-4.6zM18.5 18.0h4.6v7.6h-4.6zM38.1 18.0h4.6v7.6h-4.6zM43.9 18.0h4.6v7.6h-4.6zM49.7 18.0h4.6v7.6h-4.6zM57.7 18.0h4.6v7.6h-4.6zM63.5 18.0h4.6v7.6h-4.6zM75.1 18.0h4.6v7.6h-4.6zM88.9 18.0h4.6v7.6h-4.6zM100.5 18.0h4.6v7.6h-4.6zM12.7 26.8h4.6v7.6h-4.6zM18.5 26.8h4.6v7.6h-4.6zM24.3 26.8h4.6v7.6h-4.6zM38.1 26.8h4.6v7.6h-4.6zM43.9 26.8h4.6v7.6h-4.6zM57.7 26.8h4.6v7.6h-4.6zM69.3 26.8h4.6v7.6h-4.6zM75.1 26.8h4.6v7.6h-4.6zM88.9 26.8h4.6v7.6h-4.6zM12.7 35.6h4.6v7.6h-4.6zM18.5 35.6h4.6v7.6h-4.6zM38.1 35.6h4.6v7.6h-4.6zM43.9 35.6h4.6v7.6h-4.6zM49.7 35.6h4.6v7.6h-4.6zM57.7 35.6h4.6v7.6h-4.6zM75.1 35.6h4.6v7.6h-4.6zM88.9 35.6h4.6v7.6h-4.6zM100.5 35.6h4.6v7.6h-4.6zM12.7 44.4h4.6v7.6h-4.6zM18.5 44.4h4.6v7.6h-4.6zM24.3 44.4h4.6v7.6h-4.6zM38.1 44.4h4.6v7.6h-4.6zM43.9 44.4h4.6v7.6h-4.6zM57.7 44.4h4.6v7.6h-4.6zM63.5 44.4h4.6v7.6h-4.6zM75.1 44.4h4.6v7.6h-4.6z"/><path class="gh" d="M6.9 18.0h4.6v7.6h-4.6zM24.3 18.0h4.6v7.6h-4.6zM32.3 18.0h4.6v7.6h-4.6zM69.3 18.0h4.6v7.6h-4.6zM83.1 18.0h4.6v7.6h-4.6zM94.7 18.0h4.6v7.6h-4.6zM6.9 26.8h4.6v7.6h-4.6zM32.3 26.8h4.6v7.6h-4.6zM49.7 26.8h4.6v7.6h-4.6zM63.5 26.8h4.6v7.6h-4.6zM83.1 26.8h4.6v7.6h-4.6zM94.7 26.8h4.6v7.6h-4.6zM100.5 26.8h4.6v7.6h-4.6zM6.9 35.6h4.6v7.6h-4.6zM24.3 35.6h4.6v7.6h-4.6zM32.3 35.6h4.6v7.6h-4.6zM63.5 35.6h4.6v7.6h-4.6zM69.3 35.6h4.6v7.6h-4.6zM83.1 35.6h4.6v7.6h-4.6zM94.7 35.6h4.6v7.6h-4.6zM6.9 44.4h4.6v7.6h-4.6zM32.3 44.4h4.6v7.6h-4.6zM49.7 44.4h4.6v7.6h-4.6zM69.3 44.4h4.6v7.6h-4.6zM83.1 44.4h4.6v7.6h-4.6zM88.9 44.4h4.6v7.6h-4.6zM94.7 44.4h4.6v7.6h-4.6zM100.5 44.4h4.6v7.6h-4.6z"/></svg>Gate Patterns</a></li>
+<li><a href="#paraphonic"><svg class="pn" viewBox="0 0 112 70" width="151" height="94" aria-hidden="true"><rect class="fr" x=".5" y=".5" width="111" height="69" rx="3"/><circle class="off" cx="29" cy="23" r="13"/><circle class="cap" cx="29" cy="23" r="9.1" stroke-width="2.1"/><text x="29" y="25.8" class="an">1</text><circle class="off" cx="14" cy="52" r="9"/><circle class="cap" cx="14" cy="52" r="6.3" stroke-width="1.4"/><text x="14" y="54.8" class="an">2</text><circle class="off" cx="44" cy="52" r="9"/><circle class="cap" cx="44" cy="52" r="6.3" stroke-width="1.4"/><text x="44" y="54.8" class="an">3</text><circle class="off" cx="83" cy="23" r="13"/><circle class="cap" cx="83" cy="23" r="9.1" stroke-width="2.1"/><text x="83" y="25.8" class="an">4</text><circle class="off" cx="68" cy="52" r="9"/><circle class="cap" cx="68" cy="52" r="6.3" stroke-width="1.4"/><text x="68" y="54.8" class="an">5</text><circle class="off" cx="98" cy="52" r="9"/><circle class="cap" cx="98" cy="52" r="6.3" stroke-width="1.4"/><text x="98" y="54.8" class="an">6</text></svg>Paraphonic</a></li>
+<li><a href="#harmony"><svg class="pn" viewBox="0 0 112 70" width="151" height="94" aria-hidden="true"><rect class="fr" x=".5" y=".5" width="111" height="69" rx="3"/><circle class="off" cx="29" cy="23" r="13"/><circle class="cap" cx="29" cy="23" r="9.1" stroke-width="2.1"/><text x="29" y="25.8" class="an">B</text><circle class="off" cx="14" cy="52" r="9"/><circle class="cap" cx="14" cy="52" r="6.3" stroke-width="1.4"/><text x="14" y="54.8" class="an">R</text><circle class="off" cx="44" cy="52" r="9"/><circle class="cap" cx="44" cy="52" r="6.3" stroke-width="1.4"/><text x="44" y="54.8" class="an">3</text><circle class="off" cx="83" cy="23" r="13"/><circle class="cap" cx="83" cy="23" r="9.1" stroke-width="2.1"/><text x="83" y="25.8" class="an">M</text><circle class="off" cx="68" cy="52" r="9"/><circle class="cap" cx="68" cy="52" r="6.3" stroke-width="1.4"/><text x="68" y="54.8" class="an">5</text><circle class="off" cx="98" cy="52" r="9"/><circle class="cap" cx="98" cy="52" r="6.3" stroke-width="1.4"/><text x="98" y="54.8" class="an">7</text></svg>Harmony</a></li>
+<li><a href="#morph"><svg class="pn" viewBox="0 0 112 70" width="151" height="94" aria-hidden="true"><rect class="fr" x=".5" y=".5" width="111" height="69" rx="3"/><path class="l" d="M10 54H102"/><path class="wave" d="M10 54L11.4 50.1V54L13.4 48.6V54L16.1 46.6V54L19.9 43.6V54L25.1 39.7V54L32.3 34.3V54L42.2 26.9V54L56.0 16.0V54L57.4 50.1V54L59.4 48.6V54L62.1 46.6V54L65.9 43.6V54L71.1 39.7V54L78.3 34.3V54L88.2 26.9V54L102.0 16.0V54"/></svg>Morph</a></li>
+</ul>
+</header>
+
+<nav aria-labelledby="contents">
+<h2 id="contents">Contents</h2>
+<ol>
+<li><a href="#introduction">Introduction</a>
+<ol>
+<li><a href="#what-youll-need">What You’ll Need</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#going-back">Going Back</a></li>
+<li><a href="#first-thing">The First Thing You’ll Hear</a></li>
+</ol></li>
+<li><a href="#overview">New Features Overview</a>
+<ol>
+<li><a href="#new-features">New Features</a></li>
+<li><a href="#changes">Changes to Existing Features</a></li>
+</ol></li>
+<li><a href="#detail">New Features in Detail</a>
+<ol>
+<li><a href="#settings-mode">Settings Mode</a></li>
+<li><a href="#polyrhythm">The Polyrhythm Section</a>
+<ol>
+<li><a href="#rhythm-type">Rhythm Type</a></li>
+<li><a href="#gate-patterns">Gate Patterns</a></li>
+<li><a href="#the-patterns">The Patterns</a></li>
+<li><a href="#tempo-and-clock">Tempo and Clock</a></li>
+<li><a href="#stock">Stock</a></li>
+</ol></li>
+<li><a href="#pitch-modes">Pitch Modes</a>
+<ol>
+<li><a href="#paraphonic">Paraphonic</a></li>
+<li><a href="#harmony">Harmony</a></li>
+<li><a href="#morph">Morph</a></li>
+</ol></li>
+<li><a href="#noise">Noise</a></li>
+<li><a href="#midi">MIDI Operations</a>
+<ol>
+<li><a href="#velocity">Velocity</a></li>
+<li><a href="#glide">Glide</a></li>
+<li><a href="#midi-vcf">MIDI VCF</a></li>
+<li><a href="#control-changes">Control Changes</a></li>
+</ol></li>
+</ol></li>
+</ol>
+</nav>
+
+<main>
+<h2 id="introduction">Introduction</h2>
+<p>This guide will provide everything you need to know about the Tallent Edition, an unofficial extension to your Subharmonicon’s firmware.</p>
+<p>If you’re already a Subharmonicon user (and if you’re reading this, we’re guessing you are), simply read on to discover what’s new.</p>
+<p>Everything in Moog’s Subharmonicon manual still applies. The Tallent Edition adds to Subharmonicon firmware 1.1.1, and nearly all of what it adds stays out of your way until you go looking for it. (The one exception is the first thing you’ll hear, so we’ve given it a section of its own right after installation.)</p>
+<p class="note"><b>Note</b> This is an independent project. It is not made, tested or supported by Moog Music, so please don’t send them your questions about it. Send them to us instead, at the address at the end of this guide. And as with any unofficial firmware, you install it at your own risk.</p>
+
+<h3 id="what-youll-need">What You’ll Need</h3>
+<ul>
+<li>A Subharmonicon. Whichever firmware version it’s running now is fine.</li>
+<li>The MIDI adapter (DIN socket to 3.5mm plug) that came with it.</li>
+<li>A computer with a web browser, and a MIDI interface or USB-MIDI cable with a 5-pin MIDI output.</li>
+<li>A SysEx application, such as SysEx Librarian for macOS or Bome SendSX for Windows.</li>
+</ul>
+
+<h3 id="installation">Installation</h3>
+<p>The Tallent Edition isn’t distributed as a file you can load directly. Instead, a small tool adds it to your own copy of Moog’s firmware, right in your web browser. Nothing is uploaded anywhere.</p>
+<ol>
+<li>Download Subharmonicon Firmware v1.1.1 from <a href="https://www.moogmusic.com/downloads/?product=Subharmonicon">Moog’s downloads page</a> and unzip it.</li>
+<li>Open <a class="address" href="https://brandon-tallent.github.io/subharmonicon-extended-firmware/">brandon-tallent.github.io/subharmonicon-extended-firmware</a> and select <samp>Subharmonicon_Firmware_v1_1_1.syx</samp> from the folder you just unzipped. A new file, <samp>subharmonicon-tallent-edition.syx</samp>, will download automatically.</li>
+<li>Connect your MIDI interface’s output to the Subharmonicon MIDI IN jack using the adapter, and select that interface in your SysEx application.</li>
+<li>Send <samp>subharmonicon_FIRMWARE_INVALIDATE.syx</samp> from Moog’s folder. The Step 1 LED of Sequencer 1 will blink.</li>
+<li>Send <samp>subharmonicon_FIRMWARE_ERASE.syx</samp>. The Step 2 LED of Sequencer 1 will blink.</li>
+<li>Send <samp>subharmonicon-tallent-edition.syx</samp>. The Sequencer 2 LEDs fill up from left to right as the file arrives, which takes a couple of minutes. Then the Step 3 LED of Sequencer 1 blinks a few times, and Subharmonicon restarts with its customary light show. You’re done.</li>
+</ol>
+<p class="note"><b>Note</b> Steps 3 to 6 are Moog’s own update procedure, with our file standing in for theirs at the end. The firmware update instructions in Moog’s download describe it in more detail, including what to try if a file doesn’t seem to arrive.</p>
+
+<h3 id="going-back">Going Back</h3>
+<p>To return to Moog’s firmware at any time, repeat steps 3 to 6 with Moog’s own <samp>Subharmonicon_Firmware_v1_1_1.syx</samp> as the last file. Your Subharmonicon will be just as Moog made it.</p>
+
+<h3 id="first-thing">The First Thing You’ll Hear</h3>
+<p>When Subharmonicon restarts, your oscillators, mixer, filter and envelopes are exactly where you left them. The Polyrhythm section is not.</p>
+<p>The Tallent Edition starts out with its new Gate Patterns switched on. Each RHYTHM knob now chooses a rhythm pattern instead of a division of the tempo. RHYTHM 1 and RHYTHM 2 still advance the sequencers, but the envelopes are now triggered by RHYTHM 3 and RHYTHM 4.</p>
+<p>So if you press <kbd>PLAY</kbd> and hear nothing (or nothing you expected), turn the RHYTHM 3 knob a little way up from fully counter-clockwise and make sure the <kbd>SEQ 1</kbd> button beneath it is lit.</p>
+<p>All of this is described under <a href="#gate-patterns">Gate Patterns</a>. And if you’d rather have Moog’s rhythm generators back, they’re one setting away: see <a href="#rhythm-type">Rhythm Type</a>.</p>
+
+<h2 id="overview">New Features Overview</h2>
+<p>Below you will find a summary overview of the new features and functional changes in the Tallent Edition. Refer to the next chapter for detailed descriptions.</p>
+
+<h3 id="new-features">New Features</h3>
+<dl class="wide">
+<div><dt>Gate Patterns</dt><dd>Each RHYTHM knob selects one of 32 four-bar patterns, from plain note values to house, breaks and Euclidean rhythms.</dd></div>
+<div><dt>Separate Envelope Rhythms</dt><dd>RHYTHM 3 and RHYTHM 4 trigger the VCA EG and the VCF EG, independently of the sequencers and of each other.</dd></div>
+<div><dt>Paraphonic Mode</dt><dd>All six oscillators are tuned separately, and play up to six MIDI notes at once.</dd></div>
+<div><dt>Harmony Mode</dt><dd>The oscillators play chords built from a key and scale you choose, with a bass note beneath and a melody on top.</dd></div>
+<div><dt>Morph Mode</dt><dd>The SUB 1 oscillators sweep through eight wave shapes, from a plain tone to bursts and rattles, in time with the clock.</dd></div>
+<div><dt>Noise</dt><dd>VCO 2’s SUB 2 can be traded for a noise source.</dd></div>
+<div><dt>MIDI Velocity</dt><dd>The velocity of a note can set its level.</dd></div>
+<div><dt>MIDI Glide</dt><dd>Notes played legato slide from one to the next.</dd></div>
+<div><dt>MIDI VCF</dt><dd>The VCF EG can be triggered from a MIDI channel of its own.</dd></div>
+<div><dt>MIDI Control</dt><dd>MIDI CC messages can turn the RHYTHM knobs, press the assignment buttons and change the new settings.</dd></div>
+<div><dt>Settings Mode</dt><dd>All of the new settings are made from the front panel, and are remembered when the power is off.</dd></div>
+</dl>
+
+<h3 id="changes">Changes to Existing Features</h3>
+<dl class="wide">
+<div><dt>RHYTHM knobs</dt><dd>In Gate Patterns, each knob selects a pattern in place of a division.</dd></div>
+<div><dt>RHYTHM 3 and RHYTHM 4 buttons</dt><dd>In Gate Patterns, the <kbd>SEQ 1</kbd> and <kbd>SEQ 2</kbd> buttons under these two knobs select the VCA EG and the VCF EG.</dd></div>
+<div><dt>Envelope triggering</dt><dd>In Gate Patterns, the envelopes are triggered by the RHYTHM 3 and RHYTHM 4 patterns, and no longer by the sequencers’ steps.</dd></div>
+<div><dt>TEMPO knob</dt><dd>The range is now 40 to 239&nbsp;BPM.</dd></div>
+<div><dt>CLOCK input</dt><dd>In Gate Patterns, each pulse advances the patterns by one sixteenth note.</dd></div>
+<div><dt>CLOCK output</dt><dd>Sends a pulse every sixteenth note.</dd></div>
+<div><dt>NEXT button</dt><dd>Always advances both sequencers by exactly one step.</dd></div>
+<div><dt>SEQ 1 ASSIGN buttons</dt><dd>With the sequencers stopped, holding <kbd>SUB 1</kbd> and <kbd>SUB 2</kbd> together for one second enters Settings Mode.</dd></div>
+<div><dt>Envelope outputs</dt><dd>The VCF EG and VCA EG are no longer smoothed by a few milliseconds on their way out. (We can’t honestly say we hear the difference.)</dd></div>
+<div><dt>Everything else</dt><dd>Is as Moog made it. With Pitch Mode set to Normal and Rhythm Type set to Stock, the oscillators, sequencers and rhythm generators all behave as the Subharmonicon manual describes, apart from the changes listed here.</dd></div>
+</dl>
+<p>Now on to the details…</p>
+
+<h2 id="detail">New Features in Detail</h2>
+<p>Here’s how to take advantage of everything the Tallent Edition adds. We’ll start with Settings Mode, where every new feature is switched on and off, and then cover everything else section by section.</p>
+
+<h3 id="settings-mode">Settings Mode</h3>
+<p>Subharmonicon doesn’t have a display, so the new settings are made in a mode that borrows the buttons and LEDs it does have.</p>
+<h4>Entering Settings Mode</h4>
+<div class="screen">
+<figure><svg class="pn" viewBox="0 0 150 64" width="255" height="109" role="img" aria-label="The SEQ 1 ASSIGN buttons, with SUB 1 and SUB 2 held"><rect class="fr" x=".5" y=".5" width="149" height="63" rx="3"/><path class="l" d="M15 21V14H43.4M106.6 14H135V21"/><text x="75" y="16.5">SEQ 1 ASSIGN</text><rect class="off" x="15" y="28" width="30" height="20" rx="3"/><rect class="in" x="17.6" y="30.6" width="24.8" height="14.8" rx="1.6"/><text x="30" y="40.5">OSC 1</text><rect class="hot" x="60" y="28" width="30" height="20" rx="3"/><rect class="in" x="62.6" y="30.6" width="24.8" height="14.8" rx="1.6"/><text x="75" y="40.5">SUB 1</text><rect class="hot" x="105" y="28" width="30" height="20" rx="3"/><rect class="in" x="107.6" y="30.6" width="24.8" height="14.8" rx="1.6"/><text x="120" y="40.5">SUB 2</text></svg><figcaption>Hold both for one second</figcaption></figure>
+<div>
+<ol>
+<li>Stop the sequencers. The <kbd>PLAY</kbd> button must be unlit.</li>
+<li>Press and hold the SEQ 1 ASSIGN <kbd>SUB 1</kbd> and <kbd>SUB 2</kbd> buttons together for one second, then release them.</li>
+</ol>
+<p>The <kbd>OSC 1</kbd> button begins to blink. You’re in.</p>
+</div>
+</div>
+
+<h4>Selecting a Setting</h4>
+<p>Eight buttons now each select a setting:</p>
+<figure class="panel"><svg class="pn" viewBox="0 0 372 96" width="722" height="186" role="img" aria-label="The buttons that select a setting in Settings Mode"><rect class="fr" x=".5" y=".5" width="371" height="95" rx="3"/><circle class="off" cx="26" cy="28" r="12"/><path class="l" d="M24.3 36.3L23.8 39.3M21.3 35.1L19.6 37.6M18.9 32.7L16.4 34.4M17.7 29.7L14.7 30.2M17.7 26.3L14.7 25.8M18.9 23.3L16.4 21.6M21.3 20.9L19.6 18.4M24.3 19.7L23.8 16.7M27.7 19.7L28.2 16.7M30.7 20.9L32.4 18.4M33.1 23.3L35.6 21.6M34.3 26.3L37.3 25.8M34.3 29.7L37.3 30.2M33.1 32.7L35.6 34.4M30.7 35.1L32.4 37.6M27.7 36.3L28.2 39.3"/><circle class="off" cx="26" cy="28" r="8"/><path class="ptr" d="M26.0 28.0L19.1 24.0"/><text x="26" y="10">RHYTHM 1</text><path class="l" d="M26 40.5v3.5"/><rect class="hot" x="11" y="44" width="30" height="20" rx="3"/><rect class="in" x="13.6" y="46.6" width="24.8" height="14.8" rx="1.6"/><text x="26" y="56.5">SEQ 1</text><rect class="off" x="11" y="68" width="30" height="20" rx="3"/><rect class="in" x="13.6" y="70.6" width="24.8" height="14.8" rx="1.6"/><text x="26" y="80.5">SEQ 2</text><text x="46" y="52.5" class="an s">MIDI</text><text x="46" y="61" class="an s">VCF</text><path class="l" d="M77 29V22H100.4M163.6 22H187V29"/><text x="132" y="24.5">SEQ 1 ASSIGN</text><rect class="hot" x="77" y="36" width="30" height="20" rx="3"/><rect class="in" x="79.6" y="38.6" width="24.8" height="14.8" rx="1.6"/><text x="92" y="48.5">OSC 1</text><text x="92" y="70" class="an">HARMONY</text><text x="92" y="78.5" class="an">SPREAD</text><rect class="hot" x="117" y="36" width="30" height="20" rx="3"/><rect class="in" x="119.6" y="38.6" width="24.8" height="14.8" rx="1.6"/><text x="132" y="48.5">SUB 1</text><text x="132" y="70" class="an">GLIDE</text><rect class="hot" x="157" y="36" width="30" height="20" rx="3"/><rect class="in" x="159.6" y="38.6" width="24.8" height="14.8" rx="1.6"/><text x="172" y="48.5">SUB 2</text><text x="172" y="70" class="an">VELOCITY</text><text x="172" y="78.5" class="an">DEPTH</text><rect class="hot" x="200" y="36" width="44" height="20" rx="3"/><rect class="in" x="202.6" y="38.6" width="38.8" height="14.8" rx="1.6"/><text x="222" y="48.5">QUANTIZE</text><text x="222" y="70" class="an">TUNING</text><text x="222" y="78.5" class="an">SPAN</text><path class="l" d="M257 29V22H280.4M343.6 22H367V29"/><text x="312" y="24.5">SEQ 2 ASSIGN</text><rect class="hot" x="257" y="36" width="30" height="20" rx="3"/><rect class="in" x="259.6" y="38.6" width="24.8" height="14.8" rx="1.6"/><text x="272" y="48.5">OSC 2</text><text x="272" y="70" class="an">PITCH</text><text x="272" y="78.5" class="an">MODE</text><rect class="hot" x="297" y="36" width="30" height="20" rx="3"/><rect class="in" x="299.6" y="38.6" width="24.8" height="14.8" rx="1.6"/><text x="312" y="48.5">SUB 1</text><text x="312" y="70" class="an">RHYTHM</text><text x="312" y="78.5" class="an">TYPE</text><rect class="hot" x="337" y="36" width="30" height="20" rx="3"/><rect class="in" x="339.6" y="38.6" width="24.8" height="14.8" rx="1.6"/><text x="352" y="48.5">SUB 2</text><text x="352" y="70" class="an">NOISE</text></svg></figure>
+<table class="keys">
+<thead><tr><th scope="col">Button</th><th scope="col">Setting</th></tr></thead>
+<tr><th scope="row">SEQ 1 ASSIGN <kbd>OSC 1</kbd></th><td><a href="#harmony-spread">Harmony Spread</a></td></tr>
+<tr><th scope="row">SEQ 1 ASSIGN <kbd>SUB 1</kbd></th><td><a href="#glide">Glide</a></td></tr>
+<tr><th scope="row">SEQ 1 ASSIGN <kbd>SUB 2</kbd></th><td><a href="#velocity">Velocity Depth</a></td></tr>
+<tr><th scope="row">SEQ 2 ASSIGN <kbd>OSC 2</kbd></th><td><a href="#pitch-modes">Pitch Mode</a></td></tr>
+<tr><th scope="row">SEQ 2 ASSIGN <kbd>SUB 1</kbd></th><td><a href="#rhythm-type">Rhythm Type</a></td></tr>
+<tr><th scope="row">SEQ 2 ASSIGN <kbd>SUB 2</kbd></th><td><a href="#noise">Noise</a></td></tr>
+<tr><th scope="row"><kbd>QUANTIZE</kbd></th><td><a href="#tuning-span">Tuning Span</a></td></tr>
+<tr><th scope="row">RHYTHM 1 <kbd>SEQ 1</kbd></th><td><a href="#midi-vcf">MIDI VCF</a></td></tr>
+</table>
+<p>The button of the setting you’ve selected blinks. (For Tuning Span, it’s the four QUANTIZE LEDs that blink.) The other SEQ ASSIGN buttons are lit if their setting is switched on, so the panel also shows you what’s in use.</p>
+
+<h4>Changing a Setting</h4>
+<p>Five more buttons change the setting you’ve selected, and Sequencer 1’s STEP LEDs show its value:</p>
+<figure class="panel"><svg class="pn" viewBox="0 0 372 104" width="722" height="202" role="img" aria-label="The buttons and LEDs that edit a setting in Settings Mode"><rect class="fr" x=".5" y=".5" width="371" height="103" rx="3"/><text x="68" y="13">SEQUENCER 1</text><path class="l" d="M19.6 44.4L17.2 46.8M17.0 38.0L13.5 38.0M19.6 31.6L17.2 29.2M26.0 29.0L26.0 25.5M32.4 31.6L34.8 29.2M35.0 38.0L38.5 38.0M32.4 44.4L34.8 46.8"/><circle class="off" cx="26" cy="38" r="7"/><path class="ptr" d="M26.0 38.0L19.4 35.6"/><text x="26" y="22">STEP 1</text><circle class="on" cx="26" cy="58" r="3.6"/><path class="l" d="M47.6 44.4L45.2 46.8M45.0 38.0L41.5 38.0M47.6 31.6L45.2 29.2M54.0 29.0L54.0 25.5M60.4 31.6L62.8 29.2M63.0 38.0L66.5 38.0M60.4 44.4L62.8 46.8"/><circle class="off" cx="54" cy="38" r="7"/><path class="ptr" d="M54.0 38.0L56.4 31.4"/><text x="54" y="22">STEP 2</text><circle class="on" cx="54" cy="58" r="3.6"/><path class="l" d="M75.6 44.4L73.2 46.8M73.0 38.0L69.5 38.0M75.6 31.6L73.2 29.2M82.0 29.0L82.0 25.5M88.4 31.6L90.8 29.2M91.0 38.0L94.5 38.0M88.4 44.4L90.8 46.8"/><circle class="off" cx="82" cy="38" r="7"/><path class="ptr" d="M82.0 38.0L78.5 31.9"/><text x="82" y="22">STEP 3</text><circle class="off" cx="82" cy="58" r="3.6"/><path class="l" d="M103.6 44.4L101.2 46.8M101.0 38.0L97.5 38.0M103.6 31.6L101.2 29.2M110.0 29.0L110.0 25.5M116.4 31.6L118.8 29.2M119.0 38.0L122.5 38.0M116.4 44.4L118.8 46.8"/><circle class="off" cx="110" cy="38" r="7"/><path class="ptr" d="M110.0 38.0L116.1 34.5"/><text x="110" y="22">STEP 4</text><circle class="off" cx="110" cy="58" r="3.6"/><path class="la" d="M18 66v5H118v-5"/><text x="68" y="81" class="an">VALUE</text><text x="68" y="89" class="an2">more LEDs, more of it</text><rect class="hot" x="155" y="30" width="30" height="20" rx="3"/><rect class="in" x="157.6" y="32.6" width="24.8" height="14.8" rx="1.6"/><text x="170" y="42.5">RESET</text><text x="170" y="21" class="an">LOWER</text><rect class="hot" x="193" y="30" width="30" height="20" rx="3"/><rect class="in" x="195.6" y="32.6" width="24.8" height="14.8" rx="1.6"/><text x="208" y="42.5">EG</text><text x="208" y="21" class="an">ON / OFF</text><rect class="hot" x="231" y="30" width="30" height="20" rx="3"/><rect class="in" x="233.6" y="32.6" width="24.8" height="14.8" rx="1.6"/><text x="246" y="42.5">NEXT</text><text x="246" y="21" class="an">RAISE</text><rect class="hot" x="164" y="58" width="40" height="20" rx="3"/><rect class="in" x="166.6" y="60.6" width="34.8" height="14.8" rx="1.6"/><text x="184" y="70.5">PLAY</text><rect class="off" x="212" y="58" width="40" height="20" rx="3"/><rect class="in" x="214.6" y="60.6" width="34.8" height="14.8" rx="1.6"/><text x="232" y="70.5">TRIGGER</text><text x="184" y="91" class="an">SAVE AND EXIT</text><circle class="off" cx="302" cy="18" r="3.6"/><text x="310" y="20.5" class="s">±5</text><circle class="on" cx="302" cy="33" r="3.6"/><text x="310" y="35.5" class="s">±2</text><text x="326" y="35.5" class="an s">COARSE</text><circle class="off" cx="302" cy="48" r="3.6"/><text x="310" y="50.5" class="s">±1</text><text x="326" y="50.5" class="an s">FINE</text><rect class="hot" x="290" y="66" width="40" height="20" rx="3"/><rect class="in" x="292.6" y="68.6" width="34.8" height="14.8" rx="1.6"/><text x="310" y="78.5">SEQ OCT</text></svg></figure>
+<dl class="keys">
+<div><dt><kbd>EG</kbd></dt><dd>Switches the setting on or off. The <kbd>EG</kbd> button is lit when it’s on. For a setting with an amount, <kbd>EG</kbd> switches between zero and the amount you last set.</dd></div>
+<div><dt><kbd>NEXT</kbd></dt><dd>Raises the value, or selects the next choice.</dd></div>
+<div><dt><kbd>RESET</kbd></dt><dd>Lowers the value, or selects the previous choice.</dd></div>
+<div><dt><kbd>SEQ OCT</kbd></dt><dd>Switches between coarse and fine steps, for the settings that have an amount. The ±2 LED is lit for coarse and the ±1 LED for fine.</dd></div>
+<div><dt>STEP LEDs</dt><dd>The four STEP LEDs of Sequencer 1 show the value: the more LEDs, the more of it. Each setting’s description tells you how to read them.</dd></div>
+<div><dt><kbd>PLAY</kbd></dt><dd>Saves your settings and returns Subharmonicon to normal. (It doesn’t start the sequencers.)</dd></div>
+</dl>
+<p class="note"><b>Note</b> Settings Mode also saves and closes by itself after 30&nbsp;seconds without a button press. When you leave, the SEQ ASSIGN buttons and the LEDs go back to showing what they did before. Nothing you press in Settings Mode changes your assignments.</p>
+<p class="note"><b>Another note</b> Holding <kbd>OSC 1</kbd> and <kbd>OSC 2</kbd> together still enters Moog’s Fine Tune mode, exactly as before.</p>
+
+<h4 id="whats-saved">What’s Remembered</h4>
+<p>Settings made in Settings Mode are stored when you leave it, and are still there when Subharmonicon is next powered up. The <kbd>SEQ 1</kbd> and <kbd>SEQ 2</kbd> assignments in the Polyrhythm section are remembered too, as they always have been.</p>
+<p>A setting changed by a MIDI CC message is temporary. It lasts until you change it again or switch off. (See <a href="#control-changes">Control Changes</a> for the one exception.)</p>
+
+<h3 id="polyrhythm">The Polyrhythm Section</h3>
+<h4 id="rhythm-type">Rhythm Type</h4>
+<p>Rhythm Type decides what the four RHYTHM knobs do.</p>
+<dl>
+<div><dt>Gate Patterns</dt><dd>Each knob selects one of 32 rhythm patterns. This is the setting the Tallent Edition starts out with.</dd></div>
+<div><dt>Stock</dt><dd>Each knob divides the tempo by a whole number from 1 to 16, as Moog’s manual describes.</dd></div>
+</dl>
+<p>To change the Rhythm Type, enter <a href="#settings-mode">Settings Mode</a> and press SEQ 2 ASSIGN <kbd>SUB 1</kbd>. Then:</p>
+<dl class="keys">
+<div><dt><kbd>EG</kbd></dt><dd>Switches between Stock and Gate Patterns.</dd></div>
+<div><dt><kbd>NEXT</kbd>, <kbd>RESET</kbd></dt><dd><kbd>NEXT</kbd> selects Gate Patterns. <kbd>RESET</kbd> selects Stock.</dd></div>
+<div><dt>STEP LEDs</dt><dd><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="4 of the four STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="on" cx="12" cy="11" r="3.6"/><circle class="on" cx="28" cy="11" r="3.6"/><circle class="on" cx="44" cy="11" r="3.6"/><circle class="on" cx="60" cy="11" r="3.6"/></svg> Gate Patterns<br><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="No STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="off" cx="12" cy="11" r="3.6"/><circle class="off" cx="28" cy="11" r="3.6"/><circle class="off" cx="44" cy="11" r="3.6"/><circle class="off" cx="60" cy="11" r="3.6"/></svg> Stock</dd></div>
+<div><dt>MIDI</dt><dd>CC 115</dd></div>
+</dl>
+<p>Rhythm Type is independent of Pitch Mode. Any pitch mode can be used with either.</p>
+<p class="note"><b>Note</b> Changing the Rhythm Type doesn’t restart anything. Press <kbd>RESET</kbd> afterwards if you’d like a clean start.</p>
+
+<h4 id="gate-patterns">Gate Patterns</h4>
+<p>In Gate Patterns, a RHYTHM knob selects a pattern: a four-bar phrase of sixteenth notes, 64 steps long, with a hit on some steps and a rest on the others. There are 32 to choose from. Fully counter-clockwise is silence, and they get busier (and stranger) from there. You’ll find them all under <a href="#the-patterns">The Patterns</a> below.</p>
+<p>The four rhythm generators also split into two pairs, with two different jobs:</p>
+<figure class="panel"><svg class="pn" viewBox="0 0 372 138" width="722" height="268" role="img" aria-label="The Polyrhythm section in Gate Patterns"><rect class="fr" x=".5" y=".5" width="371" height="137" rx="3"/><text x="186" y="13">POLYRHYTHM</text><circle class="off" cx="102" cy="42" r="12"/><path class="l" d="M100.3 50.3L99.8 53.3M97.3 49.1L95.6 51.6M94.9 46.7L92.4 48.4M93.7 43.7L90.7 44.2M93.7 40.3L90.7 39.8M94.9 37.3L92.4 35.6M97.3 34.9L95.6 32.4M100.3 33.7L99.8 30.7M103.7 33.7L104.2 30.7M106.7 34.9L108.4 32.4M109.1 37.3L111.6 35.6M110.3 40.3L113.3 39.8M110.3 43.7L113.3 44.2M109.1 46.7L111.6 48.4M106.7 49.1L108.4 51.6M103.7 50.3L104.2 53.3"/><circle class="off" cx="102" cy="42" r="8"/><path class="ptr" d="M102.0 42.0L94.1 43.4"/><text x="102" y="24">RHYTHM 1</text><path class="l" d="M102 54.5v3.5M102 78v4"/><rect class="off" x="87" y="58" width="30" height="20" rx="3"/><rect class="on" x="89.6" y="60.6" width="24.8" height="14.8" rx="1.6"/><text x="102" y="70.5" class="lt">SEQ 1</text><rect class="off" x="87" y="82" width="30" height="20" rx="3"/><rect class="in" x="89.6" y="84.6" width="24.8" height="14.8" rx="1.6"/><text x="102" y="94.5">SEQ 2</text><circle class="off" cx="158" cy="42" r="12"/><path class="l" d="M156.3 50.3L155.8 53.3M153.3 49.1L151.6 51.6M150.9 46.7L148.4 48.4M149.7 43.7L146.7 44.2M149.7 40.3L146.7 39.8M150.9 37.3L148.4 35.6M153.3 34.9L151.6 32.4M156.3 33.7L155.8 30.7M159.7 33.7L160.2 30.7M162.7 34.9L164.4 32.4M165.1 37.3L167.6 35.6M166.3 40.3L169.3 39.8M166.3 43.7L169.3 44.2M165.1 46.7L167.6 48.4M162.7 49.1L164.4 51.6M159.7 50.3L160.2 53.3"/><circle class="off" cx="158" cy="42" r="8"/><path class="ptr" d="M158.0 42.0L152.9 35.9"/><text x="158" y="24">RHYTHM 2</text><path class="l" d="M158 54.5v3.5M158 78v4"/><rect class="off" x="143" y="58" width="30" height="20" rx="3"/><rect class="in" x="145.6" y="60.6" width="24.8" height="14.8" rx="1.6"/><text x="158" y="70.5">SEQ 1</text><rect class="off" x="143" y="82" width="30" height="20" rx="3"/><rect class="on" x="145.6" y="84.6" width="24.8" height="14.8" rx="1.6"/><text x="158" y="94.5" class="lt">SEQ 2</text><circle class="off" cx="214" cy="42" r="12"/><path class="l" d="M212.3 50.3L211.8 53.3M209.3 49.1L207.6 51.6M206.9 46.7L204.4 48.4M205.7 43.7L202.7 44.2M205.7 40.3L202.7 39.8M206.9 37.3L204.4 35.6M209.3 34.9L207.6 32.4M212.3 33.7L211.8 30.7M215.7 33.7L216.2 30.7M218.7 34.9L220.4 32.4M221.1 37.3L223.6 35.6M222.3 40.3L225.3 39.8M222.3 43.7L225.3 44.2M221.1 46.7L223.6 48.4M218.7 49.1L220.4 51.6M215.7 50.3L216.2 53.3"/><circle class="off" cx="214" cy="42" r="8"/><path class="ptr" d="M214.0 42.0L206.5 44.7"/><text x="214" y="24">RHYTHM 3</text><path class="l" d="M214 54.5v3.5M214 78v4"/><rect class="off" x="199" y="58" width="30" height="20" rx="3"/><rect class="on" x="201.6" y="60.6" width="24.8" height="14.8" rx="1.6"/><text x="214" y="70.5" class="lt">SEQ 1</text><rect class="off" x="199" y="82" width="30" height="20" rx="3"/><rect class="in" x="201.6" y="84.6" width="24.8" height="14.8" rx="1.6"/><text x="214" y="94.5">SEQ 2</text><circle class="off" cx="270" cy="42" r="12"/><path class="l" d="M268.3 50.3L267.8 53.3M265.3 49.1L263.6 51.6M262.9 46.7L260.4 48.4M261.7 43.7L258.7 44.2M261.7 40.3L258.7 39.8M262.9 37.3L260.4 35.6M265.3 34.9L263.6 32.4M268.3 33.7L267.8 30.7M271.7 33.7L272.2 30.7M274.7 34.9L276.4 32.4M277.1 37.3L279.6 35.6M278.3 40.3L281.3 39.8M278.3 43.7L281.3 44.2M277.1 46.7L279.6 48.4M274.7 49.1L276.4 51.6M271.7 50.3L272.2 53.3"/><circle class="off" cx="270" cy="42" r="8"/><path class="ptr" d="M270.0 42.0L262.3 39.9"/><text x="270" y="24">RHYTHM 4</text><path class="l" d="M270 54.5v3.5M270 78v4"/><rect class="off" x="255" y="58" width="30" height="20" rx="3"/><rect class="in" x="257.6" y="60.6" width="24.8" height="14.8" rx="1.6"/><text x="270" y="70.5">SEQ 1</text><rect class="off" x="255" y="82" width="30" height="20" rx="3"/><rect class="on" x="257.6" y="84.6" width="24.8" height="14.8" rx="1.6"/><text x="270" y="94.5" class="lt">SEQ 2</text><text x="80" y="70.5" class="an e">SEQUENCER 1</text><text x="80" y="94.5" class="an e">SEQUENCER 2</text><text x="292" y="70.5" class="an s">VCA EG</text><text x="292" y="94.5" class="an s">VCF EG</text><path class="la" d="M87 108v5H173v-5"/><text x="130" y="123" class="an">ADVANCE THE</text><text x="130" y="131.5" class="an">SEQUENCERS</text><path class="la" d="M199 108v5H285v-5"/><text x="242" y="123" class="an">TRIGGER THE</text><text x="242" y="131.5" class="an">ENVELOPES</text></svg></figure>
+<dl>
+<div><dt>RHYTHM 1, RHYTHM 2</dt><dd>Advance the sequencers. Their <kbd>SEQ 1</kbd> and <kbd>SEQ 2</kbd> buttons work as they always have: each hit of the pattern moves Sequencer 1, Sequencer 2 or both on to the next step.</dd></div>
+<div><dt>RHYTHM 3, RHYTHM 4</dt><dd>Trigger the envelopes. Under these two knobs, the <kbd>SEQ 1</kbd> button sends the pattern’s hits to the VCA EG, and the <kbd>SEQ 2</kbd> button sends them to the VCF EG. Light both, and each hit triggers both. (Ignore what’s printed on the buttons. We do.)</dd></div>
+</dl>
+<p>That separation is the whole idea. A sequencer moving on to its next step no longer triggers anything by itself, so the notes can change on one rhythm while the volume is played by a second and the filter is accented by a third.</p>
+<p>When two patterns are sent to the same place, a hit in either one counts.</p>
+<p>A good place to start is one lit button per knob: RHYTHM 1 to Sequencer 1, RHYTHM 2 to Sequencer 2, RHYTHM 3 to the VCA EG and RHYTHM 4 to the VCF EG, as shown above. (This is also what you get if no assignments have ever been saved.)</p>
+<p>A few things to know about playing with patterns:</p>
+<ul>
+<li>All four patterns run through the same four-bar phrase. Turning a RHYTHM knob changes the pattern without losing your place in it.</li>
+<li><kbd>PLAY</kbd> pauses the phrase, and picks it up again from where it stopped. <kbd>RESET</kbd> sends the phrase and both sequencers back to the beginning.</li>
+<li><kbd>NEXT</kbd> moves both sequencers on by one step, without moving the phrase and without triggering the envelopes.</li>
+<li>Holding <kbd>RESET</kbd> still holds the sequencers on a step, as before.</li>
+<li>The <kbd>EG</kbd> button still decides whether the envelopes are triggered automatically. With it Off (unlit), the RHYTHM 3 and RHYTHM 4 patterns don’t trigger them. Held (blinking) works as before.</li>
+<li>The <kbd>TRIGGER</kbd> button, the TRIGGER input jack and MIDI notes trigger both envelopes together, as before.</li>
+</ul>
+<p>And at the patchbay:</p>
+<dl class="wide">
+<div><dt>SEQ 1 CLK, SEQ 2 CLK outputs</dt><dd>Send a pulse each time their sequencer advances, so they carry the RHYTHM 1 and RHYTHM 2 patterns.</dd></div>
+<div><dt>TRIGGER output</dt><dd>Sends a pulse on every hit that’s sent to the VCA EG.</dd></div>
+<div><dt>RHYTHM 1–4 inputs</dt><dd>A control voltage here still adds to its RHYTHM knob, and now sweeps through the patterns.</dd></div>
+</dl>
+<p class="note"><b>Note</b> MIDI CC 113 (Rhythm Generator Logic) has no effect in Gate Patterns.</p>
+<p class="note tip"><b>A tip</b> Give RHYTHM 3 quarter notes (pattern 3) for the VCA EG, give RHYTHM 4 the backbeat (pattern 10) for the VCF EG, and turn up VCF EG AMT. That’s a steady pulse with a filter accent on two and four that the sequencers know nothing about. Now turn RHYTHM 1.</p>
+
+<h4 id="the-patterns">The Patterns</h4>
+<p>Here are all 32, numbered in the order a RHYTHM knob selects them, from fully counter-clockwise (0) to fully clockwise (31). Each row is a bar, each square is a sixteenth note, and the filled squares are hits.</p>
+<p>Most patterns set up a groove in their first two bars and vary it in the last two. The plain note values don’t vary at all, which makes them the ones to reach for when you just want things to line up.</p>
+<div class="patterns"><figure><figcaption><b>0</b> Silence</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 0, Silence: 0 hits in 64 steps"><use href="#pg"/><path class="gh" d=""/></svg></figure><figure><figcaption><b>1</b> Whole notes</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 1, Whole notes: 4 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM0 10.5h8v9h-8zM0 21h8v9h-8zM0 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>2</b> Half notes</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 2, Half notes: 8 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM82 0h8v9h-8zM0 10.5h8v9h-8zM82 10.5h8v9h-8zM0 21h8v9h-8zM82 21h8v9h-8zM0 31.5h8v9h-8zM82 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>3</b> Quarter notes</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 3, Quarter notes: 16 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM41 0h8v9h-8zM82 0h8v9h-8zM123 0h8v9h-8zM0 10.5h8v9h-8zM41 10.5h8v9h-8zM82 10.5h8v9h-8zM123 10.5h8v9h-8zM0 21h8v9h-8zM41 21h8v9h-8zM82 21h8v9h-8zM123 21h8v9h-8zM0 31.5h8v9h-8zM41 31.5h8v9h-8zM82 31.5h8v9h-8zM123 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>4</b> Broken house</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 4, Broken house: 17 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM60 0h8v9h-8zM82 0h8v9h-8zM151.5 0h8v9h-8zM0 10.5h8v9h-8zM60 10.5h8v9h-8zM101 10.5h8v9h-8zM132.5 10.5h8v9h-8zM0 21h8v9h-8zM60 21h8v9h-8zM82 21h8v9h-8zM142 21h8v9h-8zM0 31.5h8v9h-8zM60 31.5h8v9h-8zM82 31.5h8v9h-8zM101 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>5</b> Eighth notes</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 5, Eighth notes: 32 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM19 0h8v9h-8zM41 0h8v9h-8zM60 0h8v9h-8zM82 0h8v9h-8zM101 0h8v9h-8zM123 0h8v9h-8zM142 0h8v9h-8zM0 10.5h8v9h-8zM19 10.5h8v9h-8zM41 10.5h8v9h-8zM60 10.5h8v9h-8zM82 10.5h8v9h-8zM101 10.5h8v9h-8zM123 10.5h8v9h-8zM142 10.5h8v9h-8zM0 21h8v9h-8zM19 21h8v9h-8zM41 21h8v9h-8zM60 21h8v9h-8zM82 21h8v9h-8zM101 21h8v9h-8zM123 21h8v9h-8zM142 21h8v9h-8zM0 31.5h8v9h-8zM19 31.5h8v9h-8zM41 31.5h8v9h-8zM60 31.5h8v9h-8zM82 31.5h8v9h-8zM101 31.5h8v9h-8zM123 31.5h8v9h-8zM142 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>6</b> Funk break</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 6, Funk break: 28 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM28.5 0h8v9h-8zM41 0h8v9h-8zM101 0h8v9h-8zM123 0h8v9h-8zM142 0h8v9h-8zM0 10.5h8v9h-8zM41 10.5h8v9h-8zM69.5 10.5h8v9h-8zM91.5 10.5h8v9h-8zM123 10.5h8v9h-8zM142 10.5h8v9h-8zM151.5 10.5h8v9h-8zM0 21h8v9h-8zM28.5 21h8v9h-8zM41 21h8v9h-8zM91.5 21h8v9h-8zM101 21h8v9h-8zM123 21h8v9h-8zM142 21h8v9h-8zM0 31.5h8v9h-8zM41 31.5h8v9h-8zM69.5 31.5h8v9h-8zM101 31.5h8v9h-8zM123 31.5h8v9h-8zM132.5 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>7</b> Sixteenth notes</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 7, Sixteenth notes: 64 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM9.5 0h8v9h-8zM19 0h8v9h-8zM28.5 0h8v9h-8zM41 0h8v9h-8zM50.5 0h8v9h-8zM60 0h8v9h-8zM69.5 0h8v9h-8zM82 0h8v9h-8zM91.5 0h8v9h-8zM101 0h8v9h-8zM110.5 0h8v9h-8zM123 0h8v9h-8zM132.5 0h8v9h-8zM142 0h8v9h-8zM151.5 0h8v9h-8zM0 10.5h8v9h-8zM9.5 10.5h8v9h-8zM19 10.5h8v9h-8zM28.5 10.5h8v9h-8zM41 10.5h8v9h-8zM50.5 10.5h8v9h-8zM60 10.5h8v9h-8zM69.5 10.5h8v9h-8zM82 10.5h8v9h-8zM91.5 10.5h8v9h-8zM101 10.5h8v9h-8zM110.5 10.5h8v9h-8zM123 10.5h8v9h-8zM132.5 10.5h8v9h-8zM142 10.5h8v9h-8zM151.5 10.5h8v9h-8zM0 21h8v9h-8zM9.5 21h8v9h-8zM19 21h8v9h-8zM28.5 21h8v9h-8zM41 21h8v9h-8zM50.5 21h8v9h-8zM60 21h8v9h-8zM69.5 21h8v9h-8zM82 21h8v9h-8zM91.5 21h8v9h-8zM101 21h8v9h-8zM110.5 21h8v9h-8zM123 21h8v9h-8zM132.5 21h8v9h-8zM142 21h8v9h-8zM151.5 21h8v9h-8zM0 31.5h8v9h-8zM9.5 31.5h8v9h-8zM19 31.5h8v9h-8zM28.5 31.5h8v9h-8zM41 31.5h8v9h-8zM50.5 31.5h8v9h-8zM60 31.5h8v9h-8zM69.5 31.5h8v9h-8zM82 31.5h8v9h-8zM91.5 31.5h8v9h-8zM101 31.5h8v9h-8zM110.5 31.5h8v9h-8zM123 31.5h8v9h-8zM132.5 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>8</b> Jungle turnaround</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 8, Jungle turnaround: 30 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM19 0h8v9h-8zM50.5 0h8v9h-8zM82 0h8v9h-8zM110.5 0h8v9h-8zM132.5 0h8v9h-8zM0 10.5h8v9h-8zM28.5 10.5h8v9h-8zM50.5 10.5h8v9h-8zM69.5 10.5h8v9h-8zM101 10.5h8v9h-8zM123 10.5h8v9h-8zM132.5 10.5h8v9h-8zM151.5 10.5h8v9h-8zM0 21h8v9h-8zM19 21h8v9h-8zM50.5 21h8v9h-8zM82 21h8v9h-8zM110.5 21h8v9h-8zM132.5 21h8v9h-8zM151.5 21h8v9h-8zM0 31.5h8v9h-8zM28.5 31.5h8v9h-8zM50.5 31.5h8v9h-8zM69.5 31.5h8v9h-8zM82 31.5h8v9h-8zM101 31.5h8v9h-8zM123 31.5h8v9h-8zM132.5 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>9</b> Offbeat eighths</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 9, Offbeat eighths: 16 hits in 64 steps"><use href="#pg"/><path class="gh" d="M19 0h8v9h-8zM60 0h8v9h-8zM101 0h8v9h-8zM142 0h8v9h-8zM19 10.5h8v9h-8zM60 10.5h8v9h-8zM101 10.5h8v9h-8zM142 10.5h8v9h-8zM19 21h8v9h-8zM60 21h8v9h-8zM101 21h8v9h-8zM142 21h8v9h-8zM19 31.5h8v9h-8zM60 31.5h8v9h-8zM101 31.5h8v9h-8zM142 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>10</b> Backbeat</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 10, Backbeat: 8 hits in 64 steps"><use href="#pg"/><path class="gh" d="M41 0h8v9h-8zM123 0h8v9h-8zM41 10.5h8v9h-8zM123 10.5h8v9h-8zM41 21h8v9h-8zM123 21h8v9h-8zM41 31.5h8v9h-8zM123 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>11</b> Disco pickup</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 11, Disco pickup: 19 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM41 0h8v9h-8zM82 0h8v9h-8zM123 0h8v9h-8zM0 10.5h8v9h-8zM41 10.5h8v9h-8zM82 10.5h8v9h-8zM123 10.5h8v9h-8zM142 10.5h8v9h-8zM0 21h8v9h-8zM41 21h8v9h-8zM82 21h8v9h-8zM123 21h8v9h-8zM0 31.5h8v9h-8zM41 31.5h8v9h-8zM82 31.5h8v9h-8zM123 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>12</b> House kick turnaround</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 12, House kick turnaround: 21 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM41 0h8v9h-8zM82 0h8v9h-8zM123 0h8v9h-8zM0 10.5h8v9h-8zM41 10.5h8v9h-8zM82 10.5h8v9h-8zM110.5 10.5h8v9h-8zM123 10.5h8v9h-8zM151.5 10.5h8v9h-8zM0 21h8v9h-8zM41 21h8v9h-8zM82 21h8v9h-8zM123 21h8v9h-8zM142 21h8v9h-8zM0 31.5h8v9h-8zM41 31.5h8v9h-8zM82 31.5h8v9h-8zM101 31.5h8v9h-8zM123 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>13</b> Electro kick</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 13, Electro kick: 18 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM60 0h8v9h-8zM101 0h8v9h-8zM0 10.5h8v9h-8zM28.5 10.5h8v9h-8zM60 10.5h8v9h-8zM123 10.5h8v9h-8zM142 10.5h8v9h-8zM0 21h8v9h-8zM60 21h8v9h-8zM82 21h8v9h-8zM101 21h8v9h-8zM0 31.5h8v9h-8zM50.5 31.5h8v9h-8zM60 31.5h8v9h-8zM123 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>14</b> Two-step garage</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 14, Two-step garage: 20 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM41 0h8v9h-8zM101 0h8v9h-8zM123 0h8v9h-8zM0 10.5h8v9h-8zM41 10.5h8v9h-8zM69.5 10.5h8v9h-8zM101 10.5h8v9h-8zM123 10.5h8v9h-8zM151.5 10.5h8v9h-8zM0 21h8v9h-8zM41 21h8v9h-8zM101 21h8v9h-8zM123 21h8v9h-8zM0 31.5h8v9h-8zM41 31.5h8v9h-8zM69.5 31.5h8v9h-8zM101 31.5h8v9h-8zM123 31.5h8v9h-8zM142 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>15</b> Tresillo with turnaround</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 15, Tresillo with turnaround: 15 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM60 0h8v9h-8zM123 0h8v9h-8zM0 10.5h8v9h-8zM60 10.5h8v9h-8zM110.5 10.5h8v9h-8zM142 10.5h8v9h-8zM0 21h8v9h-8zM60 21h8v9h-8zM123 21h8v9h-8zM0 31.5h8v9h-8zM60 31.5h8v9h-8zM110.5 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>16</b> Euclidean 5/16</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 16, Euclidean 5/16: 21 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM41 0h8v9h-8zM69.5 0h8v9h-8zM101 0h8v9h-8zM132.5 0h8v9h-8zM0 10.5h8v9h-8zM41 10.5h8v9h-8zM69.5 10.5h8v9h-8zM101 10.5h8v9h-8zM132.5 10.5h8v9h-8zM0 21h8v9h-8zM41 21h8v9h-8zM69.5 21h8v9h-8zM101 21h8v9h-8zM142 21h8v9h-8zM0 31.5h8v9h-8zM41 31.5h8v9h-8zM69.5 31.5h8v9h-8zM101 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>17</b> Euclidean 7/16</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 17, Euclidean 7/16: 29 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM28.5 0h8v9h-8zM50.5 0h8v9h-8zM69.5 0h8v9h-8zM101 0h8v9h-8zM123 0h8v9h-8zM142 0h8v9h-8zM0 10.5h8v9h-8zM28.5 10.5h8v9h-8zM50.5 10.5h8v9h-8zM69.5 10.5h8v9h-8zM101 10.5h8v9h-8zM123 10.5h8v9h-8zM142 10.5h8v9h-8zM0 21h8v9h-8zM28.5 21h8v9h-8zM50.5 21h8v9h-8zM69.5 21h8v9h-8zM101 21h8v9h-8zM123 21h8v9h-8zM142 21h8v9h-8zM0 31.5h8v9h-8zM28.5 31.5h8v9h-8zM50.5 31.5h8v9h-8zM69.5 31.5h8v9h-8zM101 31.5h8v9h-8zM123 31.5h8v9h-8zM132.5 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>18</b> Euclidean 9/32</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 18, Euclidean 9/32: 19 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM41 0h8v9h-8zM82 0h8v9h-8zM110.5 0h8v9h-8zM151.5 0h8v9h-8zM19 10.5h8v9h-8zM60 10.5h8v9h-8zM91.5 10.5h8v9h-8zM132.5 10.5h8v9h-8zM0 21h8v9h-8zM41 21h8v9h-8zM82 21h8v9h-8zM110.5 21h8v9h-8zM151.5 21h8v9h-8zM19 31.5h8v9h-8zM60 31.5h8v9h-8zM91.5 31.5h8v9h-8zM123 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>19</b> Euclidean 11/32</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 19, Euclidean 11/32: 23 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM28.5 0h8v9h-8zM60 0h8v9h-8zM91.5 0h8v9h-8zM123 0h8v9h-8zM151.5 0h8v9h-8zM19 10.5h8v9h-8zM50.5 10.5h8v9h-8zM82 10.5h8v9h-8zM110.5 10.5h8v9h-8zM142 10.5h8v9h-8zM0 21h8v9h-8zM28.5 21h8v9h-8zM60 21h8v9h-8zM91.5 21h8v9h-8zM123 21h8v9h-8zM151.5 21h8v9h-8zM19 31.5h8v9h-8zM60 31.5h8v9h-8zM82 31.5h8v9h-8zM110.5 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>20</b> Sparse bass</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 20, Sparse bass: 9 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM60 0h8v9h-8zM123 0h8v9h-8zM41 10.5h8v9h-8zM0 21h8v9h-8zM60 21h8v9h-8zM123 21h8v9h-8zM41 31.5h8v9h-8zM101 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>21</b> Rolling bass</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 21, Rolling bass: 14 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM60 0h8v9h-8zM123 0h8v9h-8zM41 10.5h8v9h-8zM101 10.5h8v9h-8zM123 10.5h8v9h-8zM0 21h8v9h-8zM60 21h8v9h-8zM123 21h8v9h-8zM0 31.5h8v9h-8zM41 31.5h8v9h-8zM101 31.5h8v9h-8zM123 31.5h8v9h-8zM142 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>22</b> Broken bass</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 22, Broken bass: 16 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM41 0h8v9h-8zM60 0h8v9h-8zM41 10.5h8v9h-8zM60 10.5h8v9h-8zM123 10.5h8v9h-8zM142 10.5h8v9h-8zM0 21h8v9h-8zM41 21h8v9h-8zM60 21h8v9h-8zM142 21h8v9h-8zM41 31.5h8v9h-8zM60 31.5h8v9h-8zM123 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>23</b> Clustered bass</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 23, Clustered bass: 15 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM60 0h8v9h-8zM82 0h8v9h-8zM142 0h8v9h-8zM0 10.5h8v9h-8zM60 10.5h8v9h-8zM82 10.5h8v9h-8zM0 21h8v9h-8zM60 21h8v9h-8zM82 21h8v9h-8zM142 21h8v9h-8zM0 31.5h8v9h-8zM60 31.5h8v9h-8zM82 31.5h8v9h-8zM142 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>24</b> Busy bass</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 24, Busy bass: 17 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM41 0h8v9h-8zM82 0h8v9h-8zM101 0h8v9h-8zM0 10.5h8v9h-8zM19 10.5h8v9h-8zM60 10.5h8v9h-8zM82 10.5h8v9h-8zM0 21h8v9h-8zM41 21h8v9h-8zM82 21h8v9h-8zM101 21h8v9h-8zM0 31.5h8v9h-8zM19 31.5h8v9h-8zM60 31.5h8v9h-8zM82 31.5h8v9h-8zM142 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>25</b> Snare flams</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 25, Snare flams: 13 hits in 64 steps"><use href="#pg"/><path class="gh" d="M82 0h8v9h-8zM110.5 0h8v9h-8zM142 0h8v9h-8zM82 10.5h8v9h-8zM123 10.5h8v9h-8zM132.5 10.5h8v9h-8zM82 21h8v9h-8zM110.5 21h8v9h-8zM142 21h8v9h-8zM82 31.5h8v9h-8zM123 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>26</b> Snare pickup</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 26, Snare pickup: 13 hits in 64 steps"><use href="#pg"/><path class="gh" d="M82 0h8v9h-8zM123 0h8v9h-8zM60 10.5h8v9h-8zM82 10.5h8v9h-8zM123 10.5h8v9h-8zM142 10.5h8v9h-8zM82 21h8v9h-8zM123 21h8v9h-8zM60 31.5h8v9h-8zM82 31.5h8v9h-8zM123 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>27</b> Backbeat pickup</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 27, Backbeat pickup: 11 hits in 64 steps"><use href="#pg"/><path class="gh" d="M41 0h8v9h-8zM123 0h8v9h-8zM41 10.5h8v9h-8zM123 10.5h8v9h-8zM142 10.5h8v9h-8zM41 21h8v9h-8zM123 21h8v9h-8zM41 31.5h8v9h-8zM123 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>28</b> Eighth hats with fill</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 28, Eighth hats with fill: 38 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM19 0h8v9h-8zM41 0h8v9h-8zM60 0h8v9h-8zM82 0h8v9h-8zM101 0h8v9h-8zM123 0h8v9h-8zM142 0h8v9h-8zM0 10.5h8v9h-8zM19 10.5h8v9h-8zM41 10.5h8v9h-8zM60 10.5h8v9h-8zM82 10.5h8v9h-8zM101 10.5h8v9h-8zM123 10.5h8v9h-8zM132.5 10.5h8v9h-8zM142 10.5h8v9h-8zM151.5 10.5h8v9h-8zM0 21h8v9h-8zM19 21h8v9h-8zM41 21h8v9h-8zM60 21h8v9h-8zM82 21h8v9h-8zM101 21h8v9h-8zM123 21h8v9h-8zM142 21h8v9h-8zM0 31.5h8v9h-8zM19 31.5h8v9h-8zM41 31.5h8v9h-8zM60 31.5h8v9h-8zM82 31.5h8v9h-8zM91.5 31.5h8v9h-8zM101 31.5h8v9h-8zM110.5 31.5h8v9h-8zM123 31.5h8v9h-8zM132.5 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>29</b> Hat turnaround</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 29, Hat turnaround: 13 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM0 10.5h8v9h-8zM82 10.5h8v9h-8zM101 10.5h8v9h-8zM123 10.5h8v9h-8zM142 10.5h8v9h-8zM0 21h8v9h-8zM0 31.5h8v9h-8zM82 31.5h8v9h-8zM101 31.5h8v9h-8zM123 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>30</b> Hat bursts</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 30, Hat bursts: 35 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM19 0h8v9h-8zM41 0h8v9h-8zM50.5 0h8v9h-8zM60 0h8v9h-8zM69.5 0h8v9h-8zM0 10.5h8v9h-8zM19 10.5h8v9h-8zM41 10.5h8v9h-8zM50.5 10.5h8v9h-8zM60 10.5h8v9h-8zM69.5 10.5h8v9h-8zM82 10.5h8v9h-8zM0 21h8v9h-8zM19 21h8v9h-8zM41 21h8v9h-8zM50.5 21h8v9h-8zM60 21h8v9h-8zM69.5 21h8v9h-8zM82 21h8v9h-8zM91.5 21h8v9h-8zM101 21h8v9h-8zM110.5 21h8v9h-8zM0 31.5h8v9h-8zM19 31.5h8v9h-8zM41 31.5h8v9h-8zM50.5 31.5h8v9h-8zM60 31.5h8v9h-8zM69.5 31.5h8v9h-8zM82 31.5h8v9h-8zM91.5 31.5h8v9h-8zM101 31.5h8v9h-8zM110.5 31.5h8v9h-8zM123 31.5h8v9h-8zM142 31.5h8v9h-8z"/></svg></figure><figure><figcaption><b>31</b> Four-floor pickup</figcaption><svg class="pat" viewBox="0 0 159.5 40.5" width="271" height="69" role="img" aria-label="Pattern 31, Four-floor pickup: 19 hits in 64 steps"><use href="#pg"/><path class="gh" d="M0 0h8v9h-8zM41 0h8v9h-8zM82 0h8v9h-8zM123 0h8v9h-8zM0 10.5h8v9h-8zM41 10.5h8v9h-8zM82 10.5h8v9h-8zM101 10.5h8v9h-8zM123 10.5h8v9h-8zM0 21h8v9h-8zM41 21h8v9h-8zM82 21h8v9h-8zM123 21h8v9h-8zM0 31.5h8v9h-8zM41 31.5h8v9h-8zM82 31.5h8v9h-8zM123 31.5h8v9h-8zM142 31.5h8v9h-8zM151.5 31.5h8v9h-8z"/></svg></figure></div>
+
+<h4 id="tempo-and-clock">Tempo and Clock</h4>
+<dl class="wide">
+<div><dt>TEMPO knob</dt><dd>The range is now 40 to 239&nbsp;BPM, with 140&nbsp;BPM at the center position. (Moog’s 20 to 3,000&nbsp;BPM is a fine range for a clock you’re going to divide by 16, and not much use for a four-bar pattern.)</dd></div>
+<div><dt>MIDI clock</dt><dd>As before, a MIDI clock received at the MIDI IN jack takes over from the TEMPO knob, and the patterns follow it.</dd></div>
+<div><dt>CLOCK input</dt><dd>As before, a clock signal here overrides the TEMPO knob. In Gate Patterns, each pulse advances the patterns by one sixteenth note, so send it sixteenths (four pulses per quarter note).</dd></div>
+<div><dt>CLOCK output</dt><dd>While the sequencers are playing, sends a pulse every sixteenth note. When Subharmonicon is following the CLOCK input, it sends each pulse it receives.</dd></div>
+</dl>
+<p class="note"><b>Note</b> If you clock a DFAM (or anything else that advances on every pulse) from the CLOCK output, it will now step in sixteenth notes.</p>
+
+<h4 id="stock">Stock</h4>
+<p>With Rhythm Type set to Stock, the Polyrhythm section is Moog’s again. Each RHYTHM knob divides the clock by a whole number from 1 to 16, all eight <kbd>SEQ 1</kbd> and <kbd>SEQ 2</kbd> buttons send their rhythm generator to the sequencers, the sequencers trigger the envelopes, and MIDI CC 113 chooses OR or XOR logic.</p>
+<p>Three of the changes described above do carry over:</p>
+<ul>
+<li>The TEMPO knob’s range is 40 to 239&nbsp;BPM, and on the internal clock or MIDI clock the rhythm generators divide quarter notes. A pulse at the CLOCK input is still one count, as before.</li>
+<li>The CLOCK output sends sixteenth notes on the internal clock or MIDI clock.</li>
+<li><kbd>NEXT</kbd> advances both sequencers by exactly one step, whatever the assignments.</li>
+</ul>
+
+<h3 id="pitch-modes">Pitch Modes</h3>
+<p>Pitch Mode decides how Subharmonicon’s six oscillators are tuned. There are four:</p>
+<dl>
+<div><dt>Normal</dt><dd>Moog’s tuning. Each subharmonic oscillator plays an undertone of its VCO.</dd></div>
+<div><dt><a href="#paraphonic">Paraphonic</a></dt><dd>All six oscillators are tuned separately, and can play six MIDI notes.</dd></div>
+<div><dt><a href="#harmony">Harmony</a></dt><dd>The oscillators play chords in a key and scale you choose.</dd></div>
+<div><dt><a href="#morph">Morph</a></dt><dd>The SUB 1 oscillators become shape-shifting tone generators.</dd></div>
+</dl>
+<h4 id="selecting-a-pitch-mode">Selecting a Pitch Mode</h4>
+<p>Enter <a href="#settings-mode">Settings Mode</a> and press SEQ 2 ASSIGN <kbd>OSC 2</kbd>. Then:</p>
+<dl class="keys">
+<div><dt><kbd>EG</kbd></dt><dd>Steps through the modes in the order above, and around again.</dd></div>
+<div><dt><kbd>NEXT</kbd>, <kbd>RESET</kbd></dt><dd>Select the next mode or the previous one.</dd></div>
+<div><dt>STEP LEDs</dt><dd><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="No STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="off" cx="12" cy="11" r="3.6"/><circle class="off" cx="28" cy="11" r="3.6"/><circle class="off" cx="44" cy="11" r="3.6"/><circle class="off" cx="60" cy="11" r="3.6"/></svg> Normal<br><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="1 of the four STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="on" cx="12" cy="11" r="3.6"/><circle class="off" cx="28" cy="11" r="3.6"/><circle class="off" cx="44" cy="11" r="3.6"/><circle class="off" cx="60" cy="11" r="3.6"/></svg> Paraphonic<br><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="2 of the four STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="on" cx="12" cy="11" r="3.6"/><circle class="on" cx="28" cy="11" r="3.6"/><circle class="off" cx="44" cy="11" r="3.6"/><circle class="off" cx="60" cy="11" r="3.6"/></svg> Harmony<br><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="3 of the four STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="on" cx="12" cy="11" r="3.6"/><circle class="on" cx="28" cy="11" r="3.6"/><circle class="on" cx="44" cy="11" r="3.6"/><circle class="off" cx="60" cy="11" r="3.6"/></svg> Morph</dd></div>
+<div><dt>MIDI</dt><dd>CC 114</dd></div>
+</dl>
+<p class="note"><b>Note</b> Changing the pitch mode releases any MIDI notes that are being held. It doesn’t change the Rhythm Type.</p>
+
+<h4 id="normal">Normal</h4>
+<p>Normal is the Subharmonicon you already know: two VCOs, each with two subharmonic oscillators tuned to its undertones. There’s nothing to add, except that Gate Patterns, Noise, Glide and Velocity all work in Normal mode too.</p>
+
+<h4 id="paraphonic">Paraphonic</h4>
+<p>In Moog’s design, a subharmonic oscillator can only ever play an undertone of its VCO. Paraphonic mode cuts the cord. All six oscillators (VCO 1, VCO 2 and the four subs) are tuned separately, so Subharmonicon can hold any six notes you like, and can play up to six MIDI notes at once.</p>
+<p>(It’s paraphonic rather than polyphonic because all six still share one filter, one VCA and one pair of envelopes.)</p>
+<p>Here’s what changes:</p>
+<dl class="wide">
+<div><dt>FREQ knobs</dt><dd>Each of the six FREQ knobs tunes its own oscillator. The center position is the oscillator’s note: middle C, until a MIDI note says otherwise. Rotating the knob either way raises or lowers the pitch by up to two octaves (or one: see <a href="#tuning-span">Tuning Span</a>). There’s a small flat spot at the center, so the note itself is easy to find.</dd></div>
+<div><dt>QUANTIZE</dt><dd>Applies to all six oscillators. With a scale selected, every FREQ knob steps through its notes. With no QUANTIZE LEDs lit, tuning is continuous.</dd></div>
+<div><dt>SEQ ASSIGN buttons</dt><dd>Each button adds its sequencer’s STEP knobs to that one oscillator and no other. Light <kbd>OSC 1</kbd> alone and the sequence moves VCO 1 while its subs stay put. Light all three and they move together.</dd></div>
+<div><dt>SEQ OCT</dt><dd>Still sets the range of the STEP knobs.</dd></div>
+</dl>
+<figure class="panel"><svg class="pn" viewBox="0 0 372 226" width="722" height="438" role="img" aria-label="The order in which the oscillators take MIDI notes in Paraphonic mode"><rect class="fr" x=".5" y=".5" width="371" height="225" rx="3"/><path class="l" d="M16 12h11v11H16zM345 12h11v11h-11z"/><text x="21.5" y="20">1</text><text x="350.5" y="20">2</text><path class="l" d="M32 17.5H154M218 17.5H340"/><text x="186" y="20">OSCILLATORS</text><path class="ld" d="M186 30V214"/><path class="l" d="M82.2 89.8L80.2 93.3M72.2 79.8L68.7 81.8M68.5 66.0L64.5 66.0M72.2 52.2L68.7 50.2M82.2 42.2L80.2 38.7M96.0 38.5L96.0 34.5M109.8 42.2L111.8 38.7M119.8 52.2L123.3 50.2M123.5 66.0L127.5 66.0M119.8 79.8L123.3 81.8M109.8 89.8L111.8 93.3"/><circle class="off" cx="96" cy="66" r="25"/><circle class="cap" cx="96" cy="66" r="16.5" stroke-width="5.0"/><text x="96" y="69.2" class="in-knob">1</text><text x="96" y="30">VCO 1 FREQ</text><text x="96" y="108" class="an">1ST NOTE</text><path class="l" d="M41.2 180.6L39.2 184.1M33.4 172.8L29.9 174.8M30.5 162.0L26.5 162.0M33.4 151.2L29.9 149.2M41.2 143.4L39.2 139.9M52.0 140.5L52.0 136.5M62.8 143.4L64.8 139.9M70.6 151.2L74.1 149.2M73.5 162.0L77.5 162.0M70.6 172.8L74.1 174.8M62.8 180.6L64.8 184.1"/><circle class="off" cx="52" cy="162" r="19"/><circle class="cap" cx="52" cy="162" r="12.5" stroke-width="3.8"/><text x="52" y="165.2" class="in-knob">2</text><text x="52" y="132">SUB 1 FREQ</text><text x="52" y="198" class="an">2ND NOTE</text><path class="l" d="M129.2 180.6L127.2 184.1M121.4 172.8L117.9 174.8M118.5 162.0L114.5 162.0M121.4 151.2L117.9 149.2M129.2 143.4L127.2 139.9M140.0 140.5L140.0 136.5M150.8 143.4L152.8 139.9M158.6 151.2L162.1 149.2M161.5 162.0L165.5 162.0M158.6 172.8L162.1 174.8M150.8 180.6L152.8 184.1"/><circle class="off" cx="140" cy="162" r="19"/><circle class="cap" cx="140" cy="162" r="12.5" stroke-width="3.8"/><text x="140" y="165.2" class="in-knob">3</text><text x="140" y="132">SUB 2 FREQ</text><text x="140" y="198" class="an">3RD NOTE</text><path class="l" d="M262.2 89.8L260.2 93.3M252.2 79.8L248.7 81.8M248.5 66.0L244.5 66.0M252.2 52.2L248.7 50.2M262.2 42.2L260.2 38.7M276.0 38.5L276.0 34.5M289.8 42.2L291.8 38.7M299.8 52.2L303.3 50.2M303.5 66.0L307.5 66.0M299.8 79.8L303.3 81.8M289.8 89.8L291.8 93.3"/><circle class="off" cx="276" cy="66" r="25"/><circle class="cap" cx="276" cy="66" r="16.5" stroke-width="5.0"/><text x="276" y="69.2" class="in-knob">4</text><text x="276" y="30">VCO 2 FREQ</text><text x="276" y="108" class="an">4TH NOTE</text><path class="l" d="M221.2 180.6L219.2 184.1M213.4 172.8L209.9 174.8M210.5 162.0L206.5 162.0M213.4 151.2L209.9 149.2M221.2 143.4L219.2 139.9M232.0 140.5L232.0 136.5M242.8 143.4L244.8 139.9M250.6 151.2L254.1 149.2M253.5 162.0L257.5 162.0M250.6 172.8L254.1 174.8M242.8 180.6L244.8 184.1"/><circle class="off" cx="232" cy="162" r="19"/><circle class="cap" cx="232" cy="162" r="12.5" stroke-width="3.8"/><text x="232" y="165.2" class="in-knob">5</text><text x="232" y="132">SUB 1 FREQ</text><text x="232" y="198" class="an">5TH NOTE</text><path class="l" d="M309.2 180.6L307.2 184.1M301.4 172.8L297.9 174.8M298.5 162.0L294.5 162.0M301.4 151.2L297.9 149.2M309.2 143.4L307.2 139.9M320.0 140.5L320.0 136.5M330.8 143.4L332.8 139.9M338.6 151.2L342.1 149.2M341.5 162.0L345.5 162.0M338.6 172.8L342.1 174.8M330.8 180.6L332.8 184.1"/><circle class="off" cx="320" cy="162" r="19"/><circle class="cap" cx="320" cy="162" r="12.5" stroke-width="3.8"/><text x="320" y="165.2" class="in-knob">6</text><text x="320" y="132">SUB 2 FREQ</text><text x="320" y="198" class="an">6TH NOTE</text></svg><figcaption>The order in which the oscillators take MIDI notes</figcaption></figure>
+<p>When you play MIDI notes (with the sequencers stopped, as always), each new note is handed to the next free oscillator in line: VCO 1, then its SUB 1 and SUB 2, then VCO 2 and its subs, and around again. Six notes can sound at once. A seventh takes over from an earlier one.</p>
+<p>When you release a note, its oscillator goes back to middle C (plus whatever its FREQ knob and its sequencer add).</p>
+<p class="note"><b>Note</b> An oscillator without a note isn’t silent. It rests at middle C, shifted by its FREQ knob, and you’ll hear it whenever the VCA is open and its LEVEL knob is up. So think of the six FREQ knobs as tuning the chord that Subharmonicon plays when left alone, and of each MIDI note as borrowing one voice of it for a while.</p>
+<p class="note tip"><b>A tip</b> You don’t need MIDI at all. Select 12-ET with the <kbd>QUANTIZE</kbd> button, tune a chord on the six FREQ knobs, and assign a sequencer to just one or two of the oscillators. That’s a chord with a moving voice inside it, which is something a Subharmonicon has never been able to do.</p>
+
+<h4 id="tuning-span">Tuning Span</h4>
+<p>Tuning Span sets how far the FREQ knobs reach in Paraphonic, Harmony and Morph modes: two octaves either side of center, or one. It starts out at two. (One octave makes fine tuning by hand a good deal easier.)</p>
+<p>It has nothing to do with the <kbd>SEQ OCT</kbd> button, which still sets the range of the STEP knobs.</p>
+<p>To change the Tuning Span, enter <a href="#settings-mode">Settings Mode</a> and press <kbd>QUANTIZE</kbd>. The four QUANTIZE LEDs blink. Then:</p>
+<dl class="keys">
+<div><dt><kbd>EG</kbd></dt><dd>Switches between the two spans.</dd></div>
+<div><dt><kbd>NEXT</kbd>, <kbd>RESET</kbd></dt><dd><kbd>NEXT</kbd> selects ±2 octaves. <kbd>RESET</kbd> selects ±1 octave.</dd></div>
+<div><dt>STEP LEDs</dt><dd><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="4 of the four STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="on" cx="12" cy="11" r="3.6"/><circle class="on" cx="28" cy="11" r="3.6"/><circle class="on" cx="44" cy="11" r="3.6"/><circle class="on" cx="60" cy="11" r="3.6"/></svg> ±2 octaves<br><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="1 of the four STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="on" cx="12" cy="11" r="3.6"/><circle class="off" cx="28" cy="11" r="3.6"/><circle class="off" cx="44" cy="11" r="3.6"/><circle class="off" cx="60" cy="11" r="3.6"/></svg> ±1 octave</dd></div>
+<div><dt>MIDI</dt><dd>CC 116</dd></div>
+</dl>
+
+<h4 id="harmony">Harmony</h4>
+<p>Harmony mode turns Subharmonicon into a chord machine. You choose a key and a scale. Subharmonicon works out the seventh chord that belongs on each note of that scale and plays it on the four subharmonic oscillators, with a bass note on VCO 1 and a melody on VCO 2. Whatever you do to it, it stays in key.</p>
+<p>In this mode the six FREQ knobs stop being tuning controls, and each takes on a job of its own:</p>
+<figure class="panel"><svg class="pn" viewBox="0 0 372 226" width="722" height="438" role="img" aria-label="What each FREQ knob selects in Harmony mode, and what its oscillator plays"><rect class="fr" x=".5" y=".5" width="371" height="225" rx="3"/><path class="l" d="M16 12h11v11H16zM345 12h11v11h-11z"/><text x="21.5" y="20">1</text><text x="350.5" y="20">2</text><path class="l" d="M32 17.5H154M218 17.5H340"/><text x="186" y="20">OSCILLATORS</text><path class="ld" d="M186 30V214"/><path class="l" d="M82.2 89.8L80.2 93.3M72.2 79.8L68.7 81.8M68.5 66.0L64.5 66.0M72.2 52.2L68.7 50.2M82.2 42.2L80.2 38.7M96.0 38.5L96.0 34.5M109.8 42.2L111.8 38.7M119.8 52.2L123.3 50.2M123.5 66.0L127.5 66.0M119.8 79.8L123.3 81.8M109.8 89.8L111.8 93.3"/><circle class="off" cx="96" cy="66" r="25"/><circle class="cap" cx="96" cy="66" r="16.5" stroke-width="5.0"/><path class="ptr" d="M98.1 61.5L103.0 51.0"/><text x="96" y="30">VCO 1 FREQ</text><text x="96" y="108" class="an">CHORD ROOT</text><text x="96" y="116" class="an2">plays the bass</text><path class="l" d="M41.2 180.6L39.2 184.1M33.4 172.8L29.9 174.8M30.5 162.0L26.5 162.0M33.4 151.2L29.9 149.2M41.2 143.4L39.2 139.9M52.0 140.5L52.0 136.5M62.8 143.4L64.8 139.9M70.6 151.2L74.1 149.2M73.5 162.0L77.5 162.0M70.6 172.8L74.1 174.8M62.8 180.6L64.8 184.1"/><circle class="off" cx="52" cy="162" r="19"/><circle class="cap" cx="52" cy="162" r="12.5" stroke-width="3.8"/><path class="ptr" d="M48.7 160.1L41.1 155.7"/><text x="52" y="132">SUB 1 FREQ</text><text x="52" y="198" class="an">SCALE</text><text x="52" y="206" class="an2">plays the root</text><path class="l" d="M129.2 180.6L127.2 184.1M121.4 172.8L117.9 174.8M118.5 162.0L114.5 162.0M121.4 151.2L117.9 149.2M129.2 143.4L127.2 139.9M140.0 140.5L140.0 136.5M150.8 143.4L152.8 139.9M158.6 151.2L162.1 149.2M161.5 162.0L165.5 162.0M158.6 172.8L162.1 174.8M150.8 180.6L152.8 184.1"/><circle class="off" cx="140" cy="162" r="19"/><circle class="cap" cx="140" cy="162" r="12.5" stroke-width="3.8"/><path class="ptr" d="M143.6 160.7L151.8 157.7"/><text x="140" y="132">SUB 2 FREQ</text><text x="140" y="198" class="an">KEY</text><text x="140" y="206" class="an2">plays the third</text><path class="l" d="M262.2 89.8L260.2 93.3M252.2 79.8L248.7 81.8M248.5 66.0L244.5 66.0M252.2 52.2L248.7 50.2M262.2 42.2L260.2 38.7M276.0 38.5L276.0 34.5M289.8 42.2L291.8 38.7M299.8 52.2L303.3 50.2M303.5 66.0L307.5 66.0M299.8 79.8L303.3 81.8M289.8 89.8L291.8 93.3"/><circle class="off" cx="276" cy="66" r="25"/><circle class="cap" cx="276" cy="66" r="16.5" stroke-width="5.0"/><path class="ptr" d="M274.3 61.3L270.4 50.5"/><text x="276" y="30">VCO 2 FREQ</text><text x="276" y="108" class="an">MELODY</text><text x="276" y="116" class="an2">plays the melody</text><path class="l" d="M221.2 180.6L219.2 184.1M213.4 172.8L209.9 174.8M210.5 162.0L206.5 162.0M213.4 151.2L209.9 149.2M221.2 143.4L219.2 139.9M232.0 140.5L232.0 136.5M242.8 143.4L244.8 139.9M250.6 151.2L254.1 149.2M253.5 162.0L257.5 162.0M250.6 172.8L254.1 174.8M242.8 180.6L244.8 184.1"/><circle class="off" cx="232" cy="162" r="19"/><circle class="cap" cx="232" cy="162" r="12.5" stroke-width="3.8"/><path class="ptr" d="M235.6 163.3L243.8 166.3"/><text x="232" y="132">SUB 1 FREQ</text><text x="232" y="198" class="an">INVERSION</text><text x="232" y="206" class="an2">plays the fifth</text><path class="l" d="M309.2 180.6L307.2 184.1M301.4 172.8L297.9 174.8M298.5 162.0L294.5 162.0M301.4 151.2L297.9 149.2M309.2 143.4L307.2 139.9M320.0 140.5L320.0 136.5M330.8 143.4L332.8 139.9M338.6 151.2L342.1 149.2M341.5 162.0L345.5 162.0M338.6 172.8L342.1 174.8M330.8 180.6L332.8 184.1"/><circle class="off" cx="320" cy="162" r="19"/><circle class="cap" cx="320" cy="162" r="12.5" stroke-width="3.8"/><path class="ptr" d="M316.4 163.3L308.2 166.3"/><text x="320" y="132">SUB 2 FREQ</text><text x="320" y="198" class="an">VOICING</text><text x="320" y="206" class="an2">plays the seventh</text></svg></figure>
+<table>
+<thead><tr><th scope="col">Knob</th><th scope="col">Selects</th><th scope="col">Its oscillator plays</th></tr></thead>
+<tr><th scope="row">VCO 1 FREQ</th><td>The root of the chord, from the notes of the scale</td><td>That root, one octave down, as a bass note</td></tr>
+<tr><th scope="row">SUB&nbsp;1&nbsp;FREQ (VCO&nbsp;1)</th><td>The scale: one of 14</td><td>The root</td></tr>
+<tr><th scope="row">SUB&nbsp;2&nbsp;FREQ (VCO&nbsp;1)</th><td>The key: C through B</td><td>The third</td></tr>
+<tr><th scope="row">VCO 2 FREQ</th><td>A melody note, from the notes of the scale</td><td>The melody</td></tr>
+<tr><th scope="row">SUB&nbsp;1&nbsp;FREQ (VCO&nbsp;2)</th><td>The inversion: root position, first, second or third</td><td>The fifth</td></tr>
+<tr><th scope="row">SUB&nbsp;2&nbsp;FREQ (VCO&nbsp;2)</th><td>The voicing: close, drop 2, drop 3 or open</td><td>The seventh</td></tr>
+</table>
+<p>Each of the four SUB FREQ knobs begins at its first choice when fully counter-clockwise. That’s C, Ionian (the major scale), root position and close voicing.</p>
+<p>The 14 scales, in order, are Ionian, Dorian, Phrygian, Lydian, Mixolydian, Aeolian and Locrian, followed by the harmonic minor scale and its six modes: Locrian natural 6, Ionian sharp 5, Dorian sharp 4, Phrygian natural 3, Lydian sharp 2 and Super Locrian.</p>
+<p>The VCO 1 FREQ and VCO 2 FREQ knobs work as they do in Paraphonic mode, with the note at the center position and a reach set by the <a href="#tuning-span">Tuning Span</a>, except that they can only land on notes of the scale.</p>
+<h4>Sequencing Harmony</h4>
+<p>A sequencer assigned to an oscillator moves whatever that oscillator’s FREQ knob selects. So the six SEQ ASSIGN buttons become:</p>
+<dl class="wide">
+<div><dt>SEQ 1 ASSIGN <kbd>OSC 1</kbd></dt><dd>Sequencer 1 moves the chord’s root (and the bass with it). This is your chord progression.</dd></div>
+<div><dt>SEQ 1 ASSIGN <kbd>SUB 1</kbd></dt><dd>Sequencer 1 changes the scale.</dd></div>
+<div><dt>SEQ 1 ASSIGN <kbd>SUB 2</kbd></dt><dd>Sequencer 1 changes the key.</dd></div>
+<div><dt>SEQ 2 ASSIGN <kbd>OSC 2</kbd></dt><dd>Sequencer 2 plays the melody.</dd></div>
+<div><dt>SEQ 2 ASSIGN <kbd>SUB 1</kbd></dt><dd>Sequencer 2 changes the inversion.</dd></div>
+<div><dt>SEQ 2 ASSIGN <kbd>SUB 2</kbd></dt><dd>Sequencer 2 changes the voicing.</dd></div>
+</dl>
+<p>To get started with Harmony:</p>
+<ol>
+<li>Select Harmony mode, and rotate all four SUB FREQ knobs fully counter-clockwise for C major.</li>
+<li>Turn up the four SUB LEVEL knobs. Leave VCO 1 LEVEL and VCO 2 LEVEL down for now.</li>
+<li>Light SEQ 1 ASSIGN <kbd>OSC 1</kbd>, and turn the other five SEQ ASSIGN buttons off.</li>
+<li>Press <kbd>PLAY</kbd>. The four STEP knobs of Sequencer 1 now choose four seventh chords, all of them in C major. (In Gate Patterns, that takes one pattern advancing Sequencer 1 and another triggering the VCA EG.)</li>
+<li>Bring up VCO 1 LEVEL to add the bass.</li>
+<li>Bring up VCO 2 LEVEL and light SEQ 2 ASSIGN <kbd>OSC 2</kbd>. Sequencer 2 now plays a melody over the chords.</li>
+<li>For extra credit, light SEQ 2 ASSIGN <kbd>SUB 1</kbd> as well, and Sequencer 2 will change the inversion as it goes.</li>
+</ol>
+<p class="note"><b>Note</b> The chords are always in your scale, so the <kbd>QUANTIZE</kbd> button has nothing to quantize. It does still choose between equal temperament and just intonation. Select 12-JI or 8-JI, and listen to what just intonation does for a seventh chord.</p>
+
+<h4 id="harmony-spread">Harmony Spread</h4>
+<p>Spread detunes the six oscillators against one another, for a wider, slowly moving chord. At its maximum they’re spaced evenly from 30&nbsp;cents flat (VCO 1) to 30&nbsp;cents sharp (VCO 2’s SUB 2). At zero, the tuning is exact. Spread only applies in Harmony mode.</p>
+<p>To set the Spread, enter <a href="#settings-mode">Settings Mode</a>. Harmony Spread is the setting that’s selected when you arrive (or press SEQ 1 ASSIGN <kbd>OSC 1</kbd>). Then:</p>
+<dl class="keys">
+<div><dt><kbd>EG</kbd></dt><dd>Switches between zero and the amount you last set.</dd></div>
+<div><dt><kbd>NEXT</kbd>, <kbd>RESET</kbd></dt><dd>Raise and lower the amount, in eight steps from zero to maximum. Press <kbd>SEQ OCT</kbd> for fine steps.</dd></div>
+<div><dt>STEP LEDs</dt><dd><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="No STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="off" cx="12" cy="11" r="3.6"/><circle class="off" cx="28" cy="11" r="3.6"/><circle class="off" cx="44" cy="11" r="3.6"/><circle class="off" cx="60" cy="11" r="3.6"/></svg> Zero<br><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="1 of the four STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="on" cx="12" cy="11" r="3.6"/><circle class="off" cx="28" cy="11" r="3.6"/><circle class="off" cx="44" cy="11" r="3.6"/><circle class="off" cx="60" cy="11" r="3.6"/></svg> to <svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="4 of the four STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="on" cx="12" cy="11" r="3.6"/><circle class="on" cx="28" cy="11" r="3.6"/><circle class="on" cx="44" cy="11" r="3.6"/><circle class="on" cx="60" cy="11" r="3.6"/></svg> One LED for each quarter of the range</dd></div>
+<div><dt>MIDI</dt><dd>CC 112</dd></div>
+</dl>
+<p class="note tip"><b>A tip</b> A little goes a long way. Somewhere between a quarter and a half (one or two STEP LEDs) is a good place to start.</p>
+
+<h4 id="morph">Morph</h4>
+<p>Morph is the strange one.</p>
+<p>A subharmonic oscillator makes its sound by restarting a rising ramp, over and over. Normally those restarts are evenly spaced, which is what gives you a steady pitch. In Morph mode, each SUB 1 spaces its restarts in a repeating pattern of eight instead, and its SUB 1 FREQ knob sweeps smoothly through eight differently shaped patterns:</p>
+<div class="set"><figure><svg class="pn" viewBox="0 0 100 44" width="150" height="66" role="img" aria-label="The Even shape"><rect class="fr" x=".5" y=".5" width="99" height="43" rx="3"/><path class="l" d="M6 36H94"/><path class="wave" d="M6 36L17.0 8.0V36L28.0 8.0V36L39.0 8.0V36L50.0 8.0V36L61.0 8.0V36L72.0 8.0V36L83.0 8.0V36L94.0 8.0V36"/></svg><figcaption>1. Even</figcaption></figure><figure><svg class="pn" viewBox="0 0 100 44" width="150" height="66" role="img" aria-label="The Alternating shape"><rect class="fr" x=".5" y=".5" width="99" height="43" rx="3"/><path class="l" d="M6 36H94"/><path class="wave" d="M6 36L27.0 8.0V36L28.0 34.7V36L49.0 8.0V36L50.0 34.7V36L71.0 8.0V36L72.0 34.7V36L93.0 8.0V36L94.0 34.7V36"/></svg><figcaption>2. Alternating</figcaption></figure><figure><svg class="pn" viewBox="0 0 100 44" width="150" height="66" role="img" aria-label="The Brake shape"><rect class="fr" x=".5" y=".5" width="99" height="43" rx="3"/><path class="l" d="M6 36H94"/><path class="wave" d="M6 36L8.8 33.1V36L12.5 32.0V36L17.7 30.5V36L24.9 28.4V36L34.9 25.5V36L48.6 21.5V36L67.5 16.0V36L94.0 8.0V36"/></svg><figcaption>3. Brake</figcaption></figure><figure><svg class="pn" viewBox="0 0 100 44" width="150" height="66" role="img" aria-label="The Accelerate shape"><rect class="fr" x=".5" y=".5" width="99" height="43" rx="3"/><path class="l" d="M6 36H94"/><path class="wave" d="M6 36L32.5 8.0V36L51.4 16.0V36L65.1 21.5V36L75.1 25.5V36L82.3 28.4V36L87.5 30.5V36L91.2 32.0V36L94.0 33.1V36"/></svg><figcaption>4. Accelerate</figcaption></figure><figure><svg class="pn" viewBox="0 0 100 44" width="150" height="66" role="img" aria-label="The Double burst shape"><rect class="fr" x=".5" y=".5" width="99" height="43" rx="3"/><path class="l" d="M6 36H94"/><path class="wave" d="M6 36L42.8 8.0V36L43.8 35.2V36L44.7 35.2V36L50.0 32.0V36L86.8 8.0V36L87.8 35.2V36L88.7 35.2V36L94.0 32.0V36"/></svg><figcaption>5. Double burst</figcaption></figure><figure><svg class="pn" viewBox="0 0 100 44" width="150" height="66" role="img" aria-label="The Triple burst shape"><rect class="fr" x=".5" y=".5" width="99" height="43" rx="3"/><path class="l" d="M6 36H94"/><path class="wave" d="M6 36L32.3 8.0V36L33.3 35.0V36L34.2 35.0V36L60.5 8.0V36L61.5 35.0V36L62.5 35.0V36L88.7 8.0V36L94.0 30.4V36"/></svg><figcaption>6. Triple burst</figcaption></figure><figure><svg class="pn" viewBox="0 0 100 44" width="150" height="66" role="img" aria-label="The Irregular shape"><rect class="fr" x=".5" y=".5" width="99" height="43" rx="3"/><path class="l" d="M6 36H94"/><path class="wave" d="M6 36L7.4 34.8V36L33.5 13.8V36L36.2 33.7V36L40.4 32.5V36L73.4 8.0V36L74.8 34.8V36L91.2 22.0V36L94.0 33.7V36"/></svg><figcaption>7. Irregular</figcaption></figure><figure><svg class="pn" viewBox="0 0 100 44" width="150" height="66" role="img" aria-label="The Single cluster shape"><rect class="fr" x=".5" y=".5" width="99" height="43" rx="3"/><path class="l" d="M6 36H94"/><path class="wave" d="M6 36L87.3 8.0V36L88.3 35.7V36L89.2 35.7V36L90.2 35.7V36L91.1 35.7V36L92.1 35.7V36L93.0 35.7V36L94.0 35.7V36"/></svg><figcaption>8. Single cluster</figcaption></figure></div>
+<p>Even is a plain tone, one octave below its VCO. Each shape after it bends the wave further out of true, adding undertones and shifting the pitch you hear, until you arrive at Single cluster, which is one long ramp and a rattle. Between the named shapes, the knob blends each one into the next.</p>
+<p>Here’s what the controls do in Morph mode:</p>
+<figure class="panel"><svg class="pn" viewBox="0 0 372 226" width="722" height="438" role="img" aria-label="What each FREQ knob does in Morph mode"><rect class="fr" x=".5" y=".5" width="371" height="225" rx="3"/><path class="l" d="M16 12h11v11H16zM345 12h11v11h-11z"/><text x="21.5" y="20">1</text><text x="350.5" y="20">2</text><path class="l" d="M32 17.5H154M218 17.5H340"/><text x="186" y="20">OSCILLATORS</text><path class="ld" d="M186 30V214"/><path class="l" d="M82.2 89.8L80.2 93.3M72.2 79.8L68.7 81.8M68.5 66.0L64.5 66.0M72.2 52.2L68.7 50.2M82.2 42.2L80.2 38.7M96.0 38.5L96.0 34.5M109.8 42.2L111.8 38.7M119.8 52.2L123.3 50.2M123.5 66.0L127.5 66.0M119.8 79.8L123.3 81.8M109.8 89.8L111.8 93.3"/><circle class="off" cx="96" cy="66" r="25"/><circle class="cap" cx="96" cy="66" r="16.5" stroke-width="5.0"/><path class="ptr" d="M98.1 61.5L103.0 51.0"/><text x="96" y="30">VCO 1 FREQ</text><text x="96" y="108" class="an">PITCH</text><path class="l" d="M41.2 180.6L39.2 184.1M33.4 172.8L29.9 174.8M30.5 162.0L26.5 162.0M33.4 151.2L29.9 149.2M41.2 143.4L39.2 139.9M52.0 140.5L52.0 136.5M62.8 143.4L64.8 139.9M70.6 151.2L74.1 149.2M73.5 162.0L77.5 162.0M70.6 172.8L74.1 174.8M62.8 180.6L64.8 184.1"/><circle class="off" cx="52" cy="162" r="19"/><circle class="cap" cx="52" cy="162" r="12.5" stroke-width="3.8"/><path class="ptr" d="M48.7 160.1L41.1 155.7"/><text x="52" y="132">SUB 1 FREQ</text><text x="52" y="198" class="an">SHAPE</text><path class="l" d="M129.2 180.6L127.2 184.1M121.4 172.8L117.9 174.8M118.5 162.0L114.5 162.0M121.4 151.2L117.9 149.2M129.2 143.4L127.2 139.9M140.0 140.5L140.0 136.5M150.8 143.4L152.8 139.9M158.6 151.2L162.1 149.2M161.5 162.0L165.5 162.0M158.6 172.8L162.1 174.8M150.8 180.6L152.8 184.1"/><circle class="off" cx="140" cy="162" r="19"/><circle class="cap" cx="140" cy="162" r="12.5" stroke-width="3.8"/><path class="ptr" d="M143.6 160.7L151.8 157.7"/><text x="140" y="132">SUB 2 FREQ</text><text x="140" y="198" class="an">MODULATION RATE</text><text x="140" y="206" class="an2">and SUB 2&#x27;s own pitch</text><path class="l" d="M262.2 89.8L260.2 93.3M252.2 79.8L248.7 81.8M248.5 66.0L244.5 66.0M252.2 52.2L248.7 50.2M262.2 42.2L260.2 38.7M276.0 38.5L276.0 34.5M289.8 42.2L291.8 38.7M299.8 52.2L303.3 50.2M303.5 66.0L307.5 66.0M299.8 79.8L303.3 81.8M289.8 89.8L291.8 93.3"/><circle class="off" cx="276" cy="66" r="25"/><circle class="cap" cx="276" cy="66" r="16.5" stroke-width="5.0"/><path class="ptr" d="M274.3 61.3L270.4 50.5"/><text x="276" y="30">VCO 2 FREQ</text><text x="276" y="108" class="an">PITCH</text><path class="l" d="M221.2 180.6L219.2 184.1M213.4 172.8L209.9 174.8M210.5 162.0L206.5 162.0M213.4 151.2L209.9 149.2M221.2 143.4L219.2 139.9M232.0 140.5L232.0 136.5M242.8 143.4L244.8 139.9M250.6 151.2L254.1 149.2M253.5 162.0L257.5 162.0M250.6 172.8L254.1 174.8M242.8 180.6L244.8 184.1"/><circle class="off" cx="232" cy="162" r="19"/><circle class="cap" cx="232" cy="162" r="12.5" stroke-width="3.8"/><path class="ptr" d="M235.6 163.3L243.8 166.3"/><text x="232" y="132">SUB 1 FREQ</text><text x="232" y="198" class="an">SHAPE</text><path class="l" d="M309.2 180.6L307.2 184.1M301.4 172.8L297.9 174.8M298.5 162.0L294.5 162.0M301.4 151.2L297.9 149.2M309.2 143.4L307.2 139.9M320.0 140.5L320.0 136.5M330.8 143.4L332.8 139.9M338.6 151.2L342.1 149.2M341.5 162.0L345.5 162.0M338.6 172.8L342.1 174.8M330.8 180.6L332.8 184.1"/><circle class="off" cx="320" cy="162" r="19"/><circle class="cap" cx="320" cy="162" r="12.5" stroke-width="3.8"/><path class="ptr" d="M316.4 163.3L308.2 166.3"/><text x="320" y="132">SUB 2 FREQ</text><text x="320" y="198" class="an">MODULATION RATE</text><text x="320" y="206" class="an2">and SUB 2&#x27;s own pitch</text></svg></figure>
+<dl class="wide">
+<div><dt>VCO 1 FREQ, VCO 2 FREQ</dt><dd>The pitch of each VCO, tuned as in Paraphonic mode: the note is at the center position, and the knob reaches up to two octaves either side. Each SUB 1 follows its VCO.</dd></div>
+<div><dt>SUB 1 FREQ</dt><dd>The shape, from Even (fully counter-clockwise) to Single cluster (fully clockwise).</dd></div>
+<div><dt>SUB 2 FREQ</dt><dd>Two things at once. It tunes SUB 2, as in Paraphonic mode. And SUB 2’s pitch sets the rate at which SUB 1’s timing is pushed and pulled, which sets the shape in motion. This happens even with the SUB 2 LEVEL knob all the way down.</dd></div>
+<div><dt>SEQ ASSIGN buttons</dt><dd><kbd>OSC 1</kbd> and <kbd>OSC 2</kbd> transpose a VCO and its SUB 1 together. <kbd>SUB 1</kbd> sequences the shape: with a STEP knob at its center position the shape is wherever the SUB 1 FREQ knob put it, and rotating the STEP knob moves it by up to half of the full sweep in either direction. <kbd>SUB 2</kbd> sequences SUB 2’s pitch, and the modulation rate with it.</dd></div>
+<div><dt>WAVE switches</dt><dd>In the middle position, SUB 1 modulates the pulse width of its VCO, as Moog’s manual describes. In Morph mode that carries the shape into the VCO’s own sound, even with SUB 1 LEVEL turned down.</dd></div>
+</dl>
+<p class="note"><b>Note</b> Sequencing the shape isn’t affected by <kbd>QUANTIZE</kbd> or <kbd>SEQ OCT</kbd>. For the widest sweep, start with the SUB 1 FREQ knob near its center position.</p>
+<p>Morph also listens to the clock. While the sequencers are stopped, each shape runs free. Press <kbd>PLAY</kbd>, and both subs of each VCO restart together on the downbeat of every bar, while the longest gap in each shape is nudged onto a sixteenth note whenever it falls close to one. Everything in between stays loose. At low pitches, where a shape is slow enough to hear as a rhythm, this is what makes it sit in the groove.</p>
+<p>A MIDI note in Morph mode sets the pitch of VCO 1 and VCO 2 together, keeping whatever interval you’ve tuned between them. They stay on that note after you let go.</p>
+<p class="note tip"><b>A tip</b> Brake and Accelerate, the third and fourth shapes, are at about ten and eleven o’clock on the SUB 1 FREQ knob. Their restarts crowd together or spread apart like a bouncing ball, and they’re at their best low, slow and synced to the clock.</p>
+
+<h3 id="noise">Noise</h3>
+<div class="screen">
+<figure><svg class="pn" viewBox="0 0 150 84" width="255" height="143" role="img" aria-label="The VCO 2 SUB 2 LEVEL knob"><rect class="fr" x=".5" y=".5" width="149" height="83" rx="3"/><path class="l" d="M37.7 67.8L35.7 71.2M30.2 60.2L26.8 62.2M27.5 50.0L23.5 50.0M30.2 39.8L26.8 37.8M37.8 32.2L35.8 28.8M48.0 29.5L48.0 25.5M58.2 32.2L60.2 28.8M65.8 39.8L69.2 37.8M68.5 50.0L72.5 50.0M65.8 60.2L69.2 62.2M58.2 67.8L60.2 71.2"/><circle class="off" cx="48" cy="50" r="18"/><circle class="cap" cx="48" cy="50" r="11.9" stroke-width="3.6"/><path class="ptr" d="M46.2 53.1L42.1 60.3"/><text x="48" y="21">SUB 1 LEVEL</text><path class="l" d="M97.7 67.8L95.7 71.2M90.2 60.2L86.8 62.2M87.5 50.0L83.5 50.0M90.2 39.8L86.8 37.8M97.8 32.2L95.8 28.8M108.0 29.5L108.0 25.5M118.2 32.2L120.2 28.8M125.8 39.8L129.2 37.8M128.5 50.0L132.5 50.0M125.8 60.2L129.2 62.2M118.2 67.8L120.2 71.2"/><circle class="hot" cx="108" cy="50" r="18"/><circle class="cap" cx="108" cy="50" r="11.9" stroke-width="3.6"/><path class="ptr" d="M110.3 47.2L115.6 40.9"/><text x="108" y="21">SUB 2 LEVEL</text></svg><figcaption>VCO 2’s SUB 2 LEVEL sets the noise level</figcaption></figure>
+<div>
+<p>VCO 2’s SUB 2 can be traded for a noise source. With Noise switched on, that oscillator stops playing a pitch and produces noise instead, in every pitch mode (Normal included).</p>
+<p>You mix the noise in with VCO 2’s SUB 2 LEVEL knob, and it passes through the filter and the VCA like everything else.</p>
+</div>
+</div>
+<p>The noise itself is always the same. It doesn’t follow notes, tuning, glide or the sequencers.</p>
+<p>To switch Noise on or off, enter <a href="#settings-mode">Settings Mode</a> and press SEQ 2 ASSIGN <kbd>SUB 2</kbd>. Then:</p>
+<dl class="keys">
+<div><dt><kbd>EG</kbd></dt><dd>Switches Noise on and off.</dd></div>
+<div><dt><kbd>NEXT</kbd>, <kbd>RESET</kbd></dt><dd><kbd>NEXT</kbd> switches it on. <kbd>RESET</kbd> switches it off.</dd></div>
+<div><dt>STEP LEDs</dt><dd><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="4 of the four STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="on" cx="12" cy="11" r="3.6"/><circle class="on" cx="28" cy="11" r="3.6"/><circle class="on" cx="44" cy="11" r="3.6"/><circle class="on" cx="60" cy="11" r="3.6"/></svg> On<br><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="No STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="off" cx="12" cy="11" r="3.6"/><circle class="off" cx="28" cy="11" r="3.6"/><circle class="off" cx="44" cy="11" r="3.6"/><circle class="off" cx="60" cy="11" r="3.6"/></svg> Off</dd></div>
+<div><dt>MIDI</dt><dd>CC 117</dd></div>
+</dl>
+<p class="note"><b>Note</b> In Harmony mode, VCO 2’s SUB 2 FREQ knob still selects the voicing, but the chord gives up its seventh to the noise. In Morph mode, VCO 2’s SUB 1 keeps its shape but is no longer modulated.</p>
+<p class="note tip"><b>A tip</b> Turn the other five LEVEL knobs down, pick a busy pattern for RHYTHM 3 and shorten the VCA DECAY. Subharmonicon now has a hi-hat.</p>
+
+<h3 id="midi">MIDI Operations</h3>
+<p>Everything in the MIDI Operations chapter of Moog’s manual, and in their firmware update notes, still applies. In particular, MIDI notes play Subharmonicon while the sequencers are stopped, and transpose the sequence while they’re playing.</p>
+<p>What a note plays now depends on the pitch mode:</p>
+<dl>
+<div><dt>Normal</dt><dd>One note at a time, on both VCOs and their subs, as before.</dd></div>
+<div><dt>Paraphonic</dt><dd>Up to six notes, one for each oscillator.</dd></div>
+<div><dt>Harmony</dt><dd>The note you play becomes the root of the chord (or the nearest note of the scale does), and the melody moves with it.</dd></div>
+<div><dt>Morph</dt><dd>VCO 1 and VCO 2 together, which then stay on that note.</dd></div>
+</dl>
+
+<h4 id="velocity">Velocity</h4>
+<p>Subharmonicon has always received the velocity of each MIDI note, and has always ignored it. Velocity Depth sets how much attention it now pays.</p>
+<p>At zero (where it starts out), every note plays at full level. As you raise the depth, softer notes are played more quietly, until at the maximum the softest notes all but disappear. A note at full velocity is always at full level.</p>
+<p>To set the Velocity Depth, enter <a href="#settings-mode">Settings Mode</a> and press SEQ 1 ASSIGN <kbd>SUB 2</kbd>. Then:</p>
+<dl class="keys">
+<div><dt><kbd>EG</kbd></dt><dd>Switches between zero and the depth you last set.</dd></div>
+<div><dt><kbd>NEXT</kbd>, <kbd>RESET</kbd></dt><dd>Raise and lower the depth, in eight steps from zero to maximum. Press <kbd>SEQ OCT</kbd> for fine steps.</dd></div>
+<div><dt>STEP LEDs</dt><dd><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="No STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="off" cx="12" cy="11" r="3.6"/><circle class="off" cx="28" cy="11" r="3.6"/><circle class="off" cx="44" cy="11" r="3.6"/><circle class="off" cx="60" cy="11" r="3.6"/></svg> Zero<br><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="1 of the four STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="on" cx="12" cy="11" r="3.6"/><circle class="off" cx="28" cy="11" r="3.6"/><circle class="off" cx="44" cy="11" r="3.6"/><circle class="off" cx="60" cy="11" r="3.6"/></svg> to <svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="4 of the four STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="on" cx="12" cy="11" r="3.6"/><circle class="on" cx="28" cy="11" r="3.6"/><circle class="on" cx="44" cy="11" r="3.6"/><circle class="on" cx="60" cy="11" r="3.6"/></svg> One LED for each quarter of the range</dd></div>
+<div><dt>MIDI</dt><dd>CC 111</dd></div>
+</dl>
+<p class="note"><b>Note</b> There’s only one VCA. In Paraphonic mode, the velocity of the newest note sets the level of the whole chord.</p>
+
+<h4 id="glide">Glide</h4>
+<p>Glide slides the pitch from one MIDI note to the next when you play legato (that is, when you start the new note before letting go of the old one). The envelopes aren’t retriggered, so the two notes join into a single gesture. If you’ve ever programmed a slide on a TB-303, you know the sound.</p>
+<p>Notes played separately still start on pitch. Glide works in every pitch mode, and it applies to MIDI notes only. The sequencers’ steps don’t glide.</p>
+<p>There are eight glide times to choose from: roughly 10, 22, 50, 100, 200, 500, 1000 and 2000&nbsp;milliseconds. Glide starts out at 22&nbsp;milliseconds, which is the 303’s own. (These aren’t stopwatch times. The pitch eases toward the new note, covering about two thirds of the distance in the time given.)</p>
+<p>To set up Glide, enter <a href="#settings-mode">Settings Mode</a> and press SEQ 1 ASSIGN <kbd>SUB 1</kbd>. Then:</p>
+<dl class="keys">
+<div><dt><kbd>EG</kbd></dt><dd>Switches Glide on and off. The <kbd>EG</kbd> button is lit when it’s on.</dd></div>
+<div><dt><kbd>NEXT</kbd>, <kbd>RESET</kbd></dt><dd>Select the next longer or shorter time. Press <kbd>SEQ OCT</kbd> for fine steps in between.</dd></div>
+<div><dt>STEP LEDs</dt><dd>All eight STEP LEDs, Sequencer 1’s and then Sequencer 2’s, show the time: one LED for 10&nbsp;milliseconds, two for 22, and so on up to eight for 2000.</dd></div>
+<div><dt>MIDI</dt><dd>CC 65 (on and off), CC 5 (time)</dd></div>
+</dl>
+
+<h4 id="midi-vcf">MIDI VCF</h4>
+<p>Normally, a MIDI note triggers both envelopes. With MIDI VCF switched on, the two are split between two MIDI channels:</p>
+<ul>
+<li>Notes on Subharmonicon’s own MIDI channel set the pitch and trigger the VCA EG.</li>
+<li>Notes on the next channel up trigger the VCF EG and do nothing else. It doesn’t matter which notes they are. (After channel 16 comes channel 1.)</li>
+</ul>
+<p>This lets a sequencer play filter accents from a track of their own, wherever it likes, without touching the notes.</p>
+<p>To switch MIDI VCF on or off, enter <a href="#settings-mode">Settings Mode</a> and press the <kbd>SEQ 1</kbd> button under the RHYTHM 1 knob. Then:</p>
+<dl class="keys">
+<div><dt><kbd>EG</kbd></dt><dd>Switches MIDI VCF on and off.</dd></div>
+<div><dt><kbd>NEXT</kbd>, <kbd>RESET</kbd></dt><dd><kbd>NEXT</kbd> switches it on. <kbd>RESET</kbd> switches it off.</dd></div>
+<div><dt>STEP LEDs</dt><dd><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="4 of the four STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="on" cx="12" cy="11" r="3.6"/><circle class="on" cx="28" cy="11" r="3.6"/><circle class="on" cx="44" cy="11" r="3.6"/><circle class="on" cx="60" cy="11" r="3.6"/></svg> On<br><svg class="pn leds" viewBox="0 0 72 22" width="72" height="22" role="img" aria-label="No STEP LEDs lit"><rect class="fr" x=".5" y=".5" width="71" height="21" rx="3"/><circle class="off" cx="12" cy="11" r="3.6"/><circle class="off" cx="28" cy="11" r="3.6"/><circle class="off" cx="44" cy="11" r="3.6"/><circle class="off" cx="60" cy="11" r="3.6"/></svg> Off</dd></div>
+</dl>
+<p class="note"><b>Note</b> MIDI VCF has no effect when Subharmonicon is set to receive on all MIDI channels.</p>
+
+<h4 id="control-changes">Control Changes</h4>
+<p>The Tallent Edition responds to these MIDI CC messages, in addition to the ones listed in Moog’s manual:</p>
+<table class="cc">
+<thead><tr><th scope="col">CC</th><th scope="col">Parameter</th><th scope="col">Values</th></tr></thead>
+<tr><td>5</td><td>Glide Time</td><td>0–127, from 10&nbsp;milliseconds to 2&nbsp;seconds. A value of 0 selects 22&nbsp;milliseconds. (CC 37 is the fine half of the same value.)</td></tr>
+<tr><td>65</td><td>Glide</td><td>0–63 Off, 64–127 On</td></tr>
+<tr><td>80–83</td><td>RHYTHM 1–4 knobs</td><td>In Gate Patterns, every four values select the next pattern: 0–3 for pattern 0, up to 124–127 for pattern 31. In Stock, every eight values select the next division: 0–7 for 16, up to 120–127 for 1.</td></tr>
+<tr><td>84–87</td><td>RHYTHM 1–4 buttons</td><td>0–31 neither, 32–63 <kbd>SEQ 1</kbd>, 64–95 <kbd>SEQ 2</kbd>, 96–127 both</td></tr>
+<tr><td>88, 89</td><td>SEQ 1 ASSIGN, SEQ 2 ASSIGN</td><td>0–15 none, 16–31 OSC, 32–47 SUB 1, 48–63 OSC and SUB 1, 64–79 SUB 2, 80–95 OSC and SUB 2, 96–111 SUB 1 and SUB 2, 112–127 all three</td></tr>
+<tr><td>111</td><td>Velocity Depth</td><td>0–127</td></tr>
+<tr><td>112</td><td>Harmony Spread</td><td>0–127</td></tr>
+<tr><td>114</td><td>Pitch Mode</td><td>0–31 Normal, 32–63 Paraphonic, 64–95 Harmony, 96–127 Morph</td></tr>
+<tr><td>115</td><td>Rhythm Type</td><td>0–63 Stock, 64–127 Gate Patterns</td></tr>
+<tr><td>116</td><td>Tuning Span</td><td>0–63 ±1 octave, 64–127 ±2 octaves</td></tr>
+<tr><td>117</td><td>Noise</td><td>0–63 Off, 64–127 On</td></tr>
+</table>
+<p>A few things to know:</p>
+<ul>
+<li>A RHYTHM knob’s CC replaces the knob until you next move the knob, just as Moog’s CCs do for the SUB FREQ knobs.</li>
+<li>The button CCs (84 to 89) set a whole group of buttons at once. They don’t toggle, so sending one twice does nothing the second time. They’re remembered just as if you had pressed the buttons, which makes them the one exception to the rule that CC changes are temporary.</li>
+<li>Moog’s CCs for the VCO FREQ and SUB FREQ knobs still stand in for those knobs, whatever the knobs happen to be doing in the current pitch mode.</li>
+<li>CC 113 (Rhythm Generator Logic) applies in Stock only.</li>
+</ul>
+<p>To store a setting permanently over MIDI, without touching the panel, the project includes a small tool that writes a SysEx file for any of the settings in this guide. You’ll find it, along with the source code, at <a class="address" href="https://github.com/brandon-tallent/subharmonicon-extended-firmware">github.com/brandon-tallent/subharmonicon-extended-firmware</a>.</p>
+
+<h3>That’s It</h3>
+<p>Everything else is exactly where Moog put it. Now go make something.</p>
+</main>
+
+<footer>
+<p>Questions and source code: <a class="address" href="https://github.com/brandon-tallent/subharmonicon-extended-firmware">github.com/brandon-tallent/subharmonicon-extended-firmware</a></p>
+<p><a href="https://brandon-tallent.github.io/subharmonicon-extended-firmware/">Install the Tallent Edition</a> · <a href="https://brandon-tallent.github.io/subharmonicon-extended-firmware/cheatsheet.html">Cheat sheet</a></p>
+<p>Copyright 2026 Brandon Tallent. Moog and Subharmonicon identify the compatible instrument; no endorsement or affiliation is implied.</p>
+</footer>
+</div>
+</body>
+</html>
