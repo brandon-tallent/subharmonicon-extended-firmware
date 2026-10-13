@@ -14,9 +14,7 @@ MEMORY
   P087024: origin=0x087024, length=0x3
   P087428: origin=0x087428, length=0x2
   P08744a: origin=0x08744a, length=0x2
-  P08763d: origin=0x08763d, length=0x1
-  P087640: origin=0x087640, length=0x1
-  P087646: origin=0x087646, length=0x1
+  P08764e: origin=0x08764e, length=0x2
   P087659: origin=0x087659, length=0x1
   P08765f: origin=0x08765f, length=0x1
   P08766c: origin=0x08766c, length=0x2
@@ -98,6 +96,7 @@ gpio_set_pin_output_enable=0x909b1;
 initialize_control_state_defaults=0x89e43;
 initialize_control_state_from_persistence=0x8a3e9;
 map_pitch_sum_to_quantized_cv=0x84730;
+master_clock_set_tempo_bpm_u16=0x8bd11;
 midi_cc_accepted=0x8d228;
 midi_cc_dispatch_above_68=0x8d10d;
 midi_held_note_insert=0x8b1f6;
@@ -135,9 +134,7 @@ SECTIONS
  .patch_087024: > P087024, PAGE=0
  .patch_087428: > P087428, PAGE=0
  .patch_08744a: > P08744a, PAGE=0
- .patch_08763d: > P08763d, PAGE=0
- .patch_087640: > P087640, PAGE=0
- .patch_087646: > P087646, PAGE=0
+ .patch_08764e: > P08764e, PAGE=0
  .patch_087659: > P087659, PAGE=0
  .patch_08765f: > P08765f, PAGE=0
  .patch_08766c: > P08766c, PAGE=0

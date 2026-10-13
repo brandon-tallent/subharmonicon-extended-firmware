@@ -186,6 +186,16 @@ feature_rhythm_routes_changed:
         MOVB ACC,#4
         LB rts_memcmp
 
+; TEMPO's request is still Moog's 20..2999 BPM. It passes through C on the
+; way to the stock setter, where Gate Patterns narrows it. XAR4 is the master
+; clock and AL the request; the setter returns to the panel pass.
+        .ref _feature_tempo_bpm
+feature_tempo_hook:
+        MOVL *SP++,XAR4
+        LCR _feature_tempo_bpm
+        MOVL XAR4,*--SP
+        LB master_clock_set_tempo_bpm_u16
+
         .ref _feature_rhythm_knob
 feature_rhythm_knob0_hook:
         LCR read_discrete_control_value

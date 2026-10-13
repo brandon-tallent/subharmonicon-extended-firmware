@@ -11,7 +11,7 @@ static uint16_t feature_config_decode(const volatile uint16_t *words,
                                       volatile struct FeatureConfig *config)
 {
     config->spread=0;config->span=0;config->glide=0;
-    config->glide_time=0;config->velocity_depth=0;config->mode=0;config->rhythm=1;config->noise=0;config->midi_vcf=0;
+    config->glide_time=0;config->velocity_depth=0;config->mode=0;config->rhythm=0;config->noise=0;config->midi_vcf=0;
     if(words[0]!=FEATURE_CONFIG_MAGIC || (words[1]!=9 && words[1]!=FEATURE_CONFIG_VERSION) ||
        words[2]>127 || words[3]>2 || words[4]>1 || words[5]>16383 || words[6]>127 || words[7]>3 || words[8]>1 || words[9]>(words[1]==9 ? 1 : 3)) return 0;
     config->spread=words[2];config->span=words[3];config->glide=words[4];

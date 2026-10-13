@@ -38,15 +38,9 @@
         .sect ".patch_08744a"
         .retain
         LCR feature_sub2_button1_hook
-        .sect ".patch_08763d"
+        .sect ".patch_08764e"
         .retain
-        .word 0x1a40 ; tempo span 200.0f, high immediate word
-        .sect ".patch_087640"
-        .retain
-        .word 0xe808 ; tempo span 200.0f, zero low immediate (MOVXI)
-        .sect ".patch_087646"
-        .retain
-        .word 0x8800 ; tempo minimum 40.0f, high immediate word
+        LCR feature_tempo_hook
         .sect ".patch_087659"
         .retain
         .word 0x9a17 ; 24-PPQN clock rate index (MOVB AL immediate)

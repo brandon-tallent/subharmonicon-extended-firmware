@@ -125,6 +125,8 @@ struct FeatureState {
     struct FeatureConfig persisted;
     uint16_t config_pending;
     uint16_t config_invalid;
+    float stock_slew[2];
+    uint16_t slew_known;
     struct ResetSchedule reset;
     uint32_t early_interrupts;
     uint32_t saved_mux;
@@ -884,6 +886,20 @@ static void feature_apply_assignments(void)
 
 /* Runs before foreground dequeue, when no MIDI payload is in flight. Heap
  * cleanup and mode changes never run from the timer interrupt. */
+/* Each CLA output slews toward its target by a fraction per 25-us tick. Gate
+ * Patterns has the two envelope outputs reach each new level on the next
+ * tick; Stock keeps the fractions Moog's firmware set. Pitch and sequence
+ * output smoothing and the envelope laws are never touched. */
+#define CLA_SLEW(slot) (*(volatile float *)(0x8040UL+(slot)*0x1aUL+0x0eUL))
+#define CLA_VCF_ENVELOPE_SLOT 2
+#define CLA_VCA_ENVELOPE_SLOT 3
+static void feature_envelope_slew(uint16_t direct)
+{
+    if(!feature_state.slew_known) return;
+    CLA_SLEW(CLA_VCF_ENVELOPE_SLOT)=direct ? 1.0f : feature_state.stock_slew[0];
+    CLA_SLEW(CLA_VCA_ENVELOPE_SLOT)=direct ? 1.0f : feature_state.stock_slew[1];
+}
+
 void feature_service(void)
 {
     uint16_t channel=REG16(0xc3c6UL);
@@ -894,12 +910,12 @@ void feature_service(void)
     if(feature_state.config_pending) {
         uint16_t i;
         feature_state.config_pending=0;
-        /* The stock CLA graph has been constructed before foreground starts.
-         * Slots 2/3 are VCF/VCA envelopes; +0x0e is the slew fraction. A
-         * fraction of one reaches each new target on the next 25-us CLA tick.
-         * Keep pitch/sequence output smoothing and the envelope laws intact. */
-        *(volatile float *)(0x8040UL+2*0x1aUL+0x0eUL)=1.0f;
-        *(volatile float *)(0x8040UL+3*0x1aUL+0x0eUL)=1.0f;
+        /* The stock CLA graph has been constructed before foreground starts. */
+        if(!feature_state.slew_known) {
+            feature_state.stock_slew[0]=CLA_SLEW(CLA_VCF_ENVELOPE_SLOT);
+            feature_state.stock_slew[1]=CLA_SLEW(CLA_VCA_ENVELOPE_SLOT);
+            feature_state.slew_known=1;
+        }
         feature_set_enabled(0);
         feature_noise_only=0;feature_state.reset.noise=0;
         feature_set_pitch_controls(0);
@@ -999,6 +1015,7 @@ static uint16_t feature_setting(uint16_t id, uint16_t value, uint16_t persist)
         }
     } else if(id==9) {
         feature_rhythm_type=value;
+        feature_envelope_slew(value);
     } else if(id==11) {
         if(feature_midi_vcf!=value) feature_vcf_reset();
         feature_midi_vcf=value;

@@ -136,6 +136,7 @@ VCO_SUBDIVISION_STATE_PTR_DP                         .set 0x3e0
         .ref initialize_control_state_defaults
         .ref initialize_control_state_from_persistence
         .ref map_pitch_sum_to_quantized_cv
+        .ref master_clock_set_tempo_bpm_u16
         .ref midi_cc_accepted
         .ref midi_cc_dispatch_above_68
         .ref midi_held_note_insert

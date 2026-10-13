@@ -10,8 +10,7 @@ shackles and applies them towards unique roles in each mode.
 All original features remain intact and usable with the Tallent Edition firmware. All new features are optionally enabled on the panel and can be toggled off to restore factory function. The original firmware can be restored any time using the manual instructions. 
 
 See the [New Features Guide](https://brandon-tallent.github.io/subharmonicon-extended-firmware/manual.html) for how everything works, the
-[cheat sheet](https://brandon-tallent.github.io/subharmonicon-extended-firmware/cheatsheet.html) for a quick reference, and
-[FEATURES.md](FEATURES.md) for the technical notes.
+[cheat sheet](https://brandon-tallent.github.io/subharmonicon-extended-firmware/cheatsheet.html) to keep beside the instrument.
 
 ## Installing
 

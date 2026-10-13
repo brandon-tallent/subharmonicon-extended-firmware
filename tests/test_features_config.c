@@ -10,7 +10,7 @@ int main(void)
     assert(feature_config_decode(words,&c) && c.spread==1 && c.span==2 && c.glide==1 && c.glide_time==16383 && c.velocity_depth==127);
     for(i=0;i<=8;++i) {
         words[1]=i;assert(!feature_config_decode(words,&c));
-        assert(!c.spread && !c.span && !c.glide && !c.glide_time && !c.velocity_depth && !c.mode && c.rhythm==1);
+        assert(!c.spread && !c.span && !c.glide && !c.glide_time && !c.velocity_depth && !c.mode && !c.rhythm);
     }
     words[1]=9;words[9]=1;
     assert(feature_config_decode(words,&c) && c.noise==1 && !c.midi_vcf);
