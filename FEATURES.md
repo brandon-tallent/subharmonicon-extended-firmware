@@ -100,7 +100,61 @@ Stock bipolar CV still adds to the selected knob/MIDI value before clamping.
 A CC changes only its lane's selection, preserving phase and assignments.
 These selections are volatile; after reboot the physical knobs select rhythms.
 
-##  pitch and MIDI settings
+## MIDI assignments
+
+CC84–87 replace R1–R4 routing; CC88 and CC89 replace SEQ1 and SEQ2
+oscillator assignments. Choices occupy equal bands across MIDI values 0–127.
+The center values below are suitable for exact automation.
+
+| Rhythm CC value | Exact center | Assignment |
+|---|---|---|
+| 0–31 | 16 | None |
+| 32–63 | 48 | Upper destination |
+| 64–95 | 80 | Lower destination |
+| 96–127 | 112 | Both |
+
+Upper/lower mean SEQ1/SEQ2 for all four Stock rhythms and for R1/R2 in
+Gate Patterns. For R3/R4 in Gate Patterns they mean VCA/VCF.
+
+| Sequencer CC value | Exact center | Assignment |
+|---|---|---|
+| 0–15 | 8 | None |
+| 16–31 | 24 | OSC |
+| 32–47 | 40 | SUB1 |
+| 48–63 | 56 | OSC + SUB1 |
+| 64–79 | 72 | SUB2 |
+| 80–95 | 88 | OSC + SUB2 |
+| 96–111 | 104 | SUB1 + SUB2 |
+| 112–127 | 120 | All three |
+
+SEQ1 controls only the VCO1 group; SEQ2 controls only the VCO2 group.
+Each message sets the complete assignment, so repeating it does not toggle
+anything. Physical buttons continue to toggle individual destinations.
+Changes preserve rhythm phase and sequencer position and use the same
+assignment state, panel indicators, and normal save behavior as button edits.
+The custom settings screen retains its page indicators until exit. During
+stock adjustment/calibration or diagnostic modes, the latest request for each
+CC waits until normal panel operation and snapshot restoration resume.
+
+## Envelope output response
+
+The VCF and VCA envelope outputs follow each new software target on the next
+25-us CLA output update. Their former output slew (approximately 2.5 ms for a
+held step) is bypassed in every pitch and rhythm mode. Pitch and sequencer CV
+outputs retain their existing smoothing.
+
+The envelope laws and controls are unchanged: attack is linear, reaching unity
+on the next 100-us envelope tick at zero; decay is exponential, with the zero
+setting retaining approximately 31.6% of the previous level per tick.
+Retriggers retain the existing attack/sustain/decay state behavior. Analog
+output reconstruction and the VCA/filter response still affect the audible
+transient; the 25-us update is not a measured analog rise-time specification.
+
+A same-patch audio comparison near 1.07 kHz has not demonstrated a sharper
+attack or an audible benefit from this bypass. Direct envelope-voltage and
+trigger-referenced measurements remain pending.
+
+## Pitch and MIDI settings
 
 With PLAY stopped, hold **SEQ 1 SUB1 + SUB2 for one second**, then release.
 
@@ -113,6 +167,7 @@ With PLAY stopped, hold **SEQ 1 SUB1 + SUB2 for one second**, then release.
 | SEQ 2 SUB1 | Rhythm type: Stock / Gate Patterns |
 | SEQ 2 SUB2 | VCO2 SUB2 noise: off / on |
 | QUANTIZE | Independent tuning span |
+| RHYTHM 1 (SEQ 1) | MIDI VCF: together / next channel |
 
 - **EG:** toggle the selected feature; spread/velocity recall their last nonzero
   amount, span alternates ±1/±2 octaves, pitch mode cycles all four modes.
@@ -134,6 +189,14 @@ old blink/timeout state is cleared. On exit both sequencers' displays return.
 Entry assignments are restored. The both-SUB2 paraphonic shortcut is removed.
 Stock both-OSC Fine Tune and both-SUB1 calibration remain.
 
+On the MIDI VCF page, **EG** toggles the split, **NEXT** selects next channel,
+and **RESET** selects together. EG and all four SEQ1 step LEDs light when on.
+With split on and a specific MIDI input channel n, Note On/Off on n controls
+pitch and VCA while transport is stopped; Note On/Off on n+1 controls VCF
+without changing pitch. Channel 16 wraps to channel 1. In Omni mode the envelopes remain coupled. Held mode
+still holds either envelope; base-channel All Notes/Sound Off closes both. The setting is
+also persistent SysEx parameter 11 (`tools/feature_config.py midi-vcf 0|1`).
+
 All six pitches follow QUANTIZE in paraphonic mode. Each Note On allocates one
 source; unallocated sources use a neutral middle-C anchor. Note Off snaps only
 its still-owned source back to that anchor, preserving knob and sequencer offsets.
@@ -150,16 +213,18 @@ links are not implemented. Velocity affects the shared VCA, hence the whole chor
 |---|---:|---|
 | Harmony spread | 112 | 0–127; zero to ±30 cents |
 | R1 / R2 / R3 / R4 | 80 / 81 / 82 / 83 | 0–127; all modes |
-| Tuning span | 116 | 0 default; 1–63 ±1, 64–127 ±2 octaves |
+| Tuning span | 116 | 0–63 ±1, 64–127 ±2 octaves; centers 32 / 96 |
 | Glide enable | 65 | 0–63 off, 64–127 on |
 | Glide time | 5 / 37 | 14-bit MSB / LSB; zero selects nominal 303 timing |
 | Velocity depth | 111 | 0–127; zero bypasses |
-| Pitch mode | 114 | 0 Normal, 1 Paraphonic, 2 Harmony, 3 Morph; other values ignored |
+| Pitch mode | 114 | 0–31 Normal, 32–63 Paraphonic, 64–95 Harmony, 96–127 Morph; centers 16 / 48 / 80 / 112 |
 | Rhythm type | 115 | 0–63 Stock, 64–127 Gate Patterns |
 | VCO2 SUB2 noise | 117 | 0–63 off, 64–127 on |
 
-CC changes are temporary; panel edits save on exit. Persistent SysEx is available
-through `tools/feature_config.py`.
+These pitch and rhythm-type CC changes are temporary; panel settings save on exit. Persistent SysEx is available
+through `tools/feature_config.py`. Pitch-mode and span SysEx values remain
+unchanged; older CC114 automation using literal 1/2/3 must use the new bands.
+CC116 value 0 now selects the narrow span.
 
 ## VCO2 SUB2 noise
 
@@ -184,7 +249,7 @@ noise-enable 0|1` generates a temporary development setting (ID14).
 
 Enter settings while stopped, select **SEQ 2 OSC2**, press RESET until Normal,
 then NEXT three times. **Three SEQ1 step LEDs** mean Morph. PLAY saves/exits.
-CC114 = 3 selects it temporarily; `tools/feature_config.py mode morph` creates
+CC114 = 112 selects it temporarily; `tools/feature_config.py mode morph` creates
 the persistent setting.
 
 - **VCO1 / VCO2 FREQ:** parent pitch, with Paraphonic tuning.
