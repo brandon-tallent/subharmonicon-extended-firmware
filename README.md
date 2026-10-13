@@ -5,12 +5,13 @@ An unofficial firmware extension for the Moog Subharmonicon:
 * 3 new pitch modes (Paraphonic, Harmony, Morph) free sub oscillators from their
 shackles and applies them towards unique roles in each mode. 
 * New midi features: 6 voices (in paraphonic mode), midi velocity, 303 style glide/legato, CC control of rhythm knobs. 
-* Alternate rhythm mode with selectable gate patterns and indpendent triggering of VCA and VCF envelopes.
+* Alternate rhythm mode with selectable gate patterns and independent triggering of VCA and VCF envelopes.
 
-All original features remain in-tact and usable with the Tallent Edition firmware. All new features are optionally enabled on the panel and can be toggled off to restore factory function. The original firmware can be restored any time using the manual instructions. 
+All original features remain intact and usable with the Tallent Edition firmware. All new features are optionally enabled on the panel and can be toggled off to restore factory function. The original firmware can be restored any time using the manual instructions. 
 
-See [FEATURES.md](FEATURES.md) for details and the quick reference
-[cheat sheet](https://brandon-tallent.github.io/subharmonicon-extended-firmware/cheatsheet.html).
+See the [New Features Guide](https://brandon-tallent.github.io/subharmonicon-extended-firmware/manual.html) for how everything works, the
+[cheat sheet](https://brandon-tallent.github.io/subharmonicon-extended-firmware/cheatsheet.html) for a quick reference, and
+[FEATURES.md](FEATURES.md) for the technical notes.
 
 ## Installing
 
@@ -43,7 +44,7 @@ python3 patcher.py /path/to/Subharmonicon_Firmware_v1_1_1.syx \
 
 ## Building from source
 
-- Download the offical firmware as described above
+- Download the official firmware as described above
 - install [TI C2000 Code Generation Tools](https://www.ti.com/tool/download/C2000-CGT)
 25.11.1.LTS
 

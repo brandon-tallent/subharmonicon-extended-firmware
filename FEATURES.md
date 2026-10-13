@@ -65,12 +65,12 @@ Pattern order, counterclockwise to clockwise. `x` = hit, `.` = rest; each group 
 | 22 | Broken bass | `x... x.x. .... .... / .... x.x. .... x.x.` | `x... x.x. .... ..x. / .... x.x. .... x.xx` |
 | 23 | Clustered bass | `x... ..x. x... ..x. / x... ..x. x... ....` | `x... ..x. x... ..x. / x... ..x. x... ..x.` |
 | 24 | Busy bass | `x... x... x.x. .... / x.x. ..x. x... ....` | `x... x... x.x. .... / x.x. ..x. x... ..x.` |
-| 25 | Flams | `.... .... x..x ..x. / .... .... x... xx..` | `.... .... x..x ..x. / .... .... x... x.xx` |
+| 25 | Snare flams | `.... .... x..x ..x. / .... .... x... xx..` | `.... .... x..x ..x. / .... .... x... x.xx` |
 | 26 | Snare pickup | `.... .... x... x... / .... ..x. x... x.x.` | `.... .... x... x... / .... ..x. x... x.xx` |
 | 27 | Backbeat pickup | `.... x... .... x... / .... x... .... x.x.` | `.... x... .... x... / .... x... .... x.xx` |
 | 28 | Eighth hats with fill | `x.x. x.x. x.x. x.x. / x.x. x.x. x.x. xxxx` | `x.x. x.x. x.x. x.x. / x.x. x.x. xxxx xxxx` |
-| 29 | Turnaround | `x... .... .... .... / x... .... x.x. x.x.` | `x... .... .... .... / x... .... x.x. x.xx` |
-| 30 | Hat bursts bursts | `x.x. xxxx .... .... / x.x. xxxx x... ....` | `x.x. xxxx xxxx .... / x.x. xxxx xxxx x.x.` |
+| 29 | Hat turnaround | `x... .... .... .... / x... .... x.x. x.x.` | `x... .... .... .... / x... .... x.x. x.xx` |
+| 30 | Hat bursts | `x.x. xxxx .... .... / x.x. xxxx x... ....` | `x.x. xxxx xxxx .... / x.x. xxxx xxxx x.x.` |
 | 31 | Four-floor pickup | `x... x... x... x... / x... x... x.x. x...` | `x... x... x... x... / x... x... x... x.xx` |
 
 Changing a pattern retains phrase position. Fully
