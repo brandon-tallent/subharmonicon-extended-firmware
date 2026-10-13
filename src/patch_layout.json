@@ -324,6 +324,21 @@
       "section": ".patch_09477e",
       "address": 608126,
       "words": 512
+    },
+    {
+      "section": ".patch_08b15b",
+      "address": 569691,
+      "words": 2
+    },
+    {
+      "section": ".patch_08b17d",
+      "address": 569725,
+      "words": 2
+    },
+    {
+      "section": ".patch_08b29b",
+      "address": 570011,
+      "words": 3
     }
   ],
   "extension_start": 608638,

@@ -86,7 +86,23 @@ _feature_disable_timer_irq:
         .ref _feature_note_added, _feature_note_deleted
         .ref _feature_note_removed, _feature_notes_reset
         .ref _feature_velocity_selected
+        .ref _feature_midi_vcf_note, _feature_midi_vcf
         .global _feature_clear_notes, _feature_gate_on, _feature_gate_off
+; Source admission is complete, but the stock channel filter has not run.
+; An adjacent-channel VCF note is consumed without changing pitch or the
+; stock held-note manager. Other messages resume the exact stock filter.
+feature_note_channel_hook:
+        MOVL *SP++,XAR4
+        MOVL XAR4,@XAR2
+        LCR _feature_midi_vcf_note
+        MOVL XAR4,*--SP
+        CMPB AL,#0
+        SB feature_note_channel_stock,EQ
+        LB midi_note_dispatch_accepted
+feature_note_channel_stock:
+        MOVW DP,#MIDI_INPUT_CONFIG_DP
+        MOVB XAR0,#MIDI_MESSAGE_STATUS_OFFSET
+        LB feature_note_filter_continue
 ; The C allocation flag is the second word; AH still carries MIDI velocity
 ; at the routing seam. Do not use an ACC-wide load here.
 feature_note_route_hook:
@@ -180,11 +196,77 @@ _feature_clear_notes:
         LRETR
 _feature_gate_on:
         MOVL XAR4,#SYNTH_ENGINE_SINGLETON
-        LCR trigger_both_envelopes
+        LCR feature_midi_gate_on
         LRETR
 _feature_gate_off:
         MOVL XAR4,#SYNTH_ENGINE_SINGLETON
+        LCR feature_midi_gate_off
+        LRETR
+
+feature_midi_gate_on:
+        MOVL XAR0,#_feature_midi_vcf
+        MOV AL,*+XAR0[0]
+        SB feature_midi_gate_on_coupled,EQ
+        MOVW DP,#MIDI_INPUT_CONFIG_DP
+        MOV AL,@MIDI_INPUT_CHANNEL_DIRECT
+        CMPB AL,#MIDI_INPUT_CHANNEL_OMNI
+        SB feature_midi_vca_on,NEQ
+feature_midi_gate_on_coupled:
+        LCR trigger_both_envelopes
+        LRETR
+feature_midi_vca_on:
+        MOVL XAR0,#ENGINE_CONTROL_UPDATE_INHIBIT
+        MOV AL,*+XAR4[AR0]
+        SB feature_midi_vca_on_done,NEQ
+        MOVL XAR4,#SYNTH_ENGINE_SINGLETON+ENGINE_VCA_ENVELOPE_OFFSET
+        MOVB AL,#1
+        LCR envelope_set_gate
+feature_midi_vca_on_done:
+        LRETR
+feature_midi_gate_off:
+        MOVL XAR0,#_feature_midi_vcf
+        MOV AL,*+XAR0[0]
+        SB feature_midi_gate_off_coupled,EQ
+        MOVW DP,#MIDI_INPUT_CONFIG_DP
+        MOV AL,@MIDI_INPUT_CHANNEL_DIRECT
+        CMPB AL,#MIDI_INPUT_CHANNEL_OMNI
+        SB feature_midi_vca_off,NEQ
+feature_midi_gate_off_coupled:
         LCR release_both_envelopes
+        LRETR
+feature_midi_vca_off:
+        MOVW DP,#CONTROL_ENVELOPE_HELD_MODE_DP
+        MOV AL,@CONTROL_ENVELOPE_HELD_MODE_DIRECT
+        MOVL XAR0,#ENGINE_CONTROL_UPDATE_INHIBIT
+        OR AL,*+XAR4[AR0]
+        SB feature_midi_vca_off_done,NEQ
+        MOVL XAR4,#SYNTH_ENGINE_SINGLETON+ENGINE_VCA_ENVELOPE_OFFSET
+        MOVB AL,#0
+        LCR envelope_set_gate
+feature_midi_vca_off_done:
+        LRETR
+        .global _feature_vcf_gate_on, _feature_vcf_gate_off
+_feature_vcf_gate_on:
+        MOVL XAR4,#SYNTH_ENGINE_SINGLETON
+        MOVL XAR0,#ENGINE_CONTROL_UPDATE_INHIBIT
+        MOV AL,*+XAR4[AR0]
+        SB feature_vcf_gate_done,NEQ
+        MOVL XAR4,#SYNTH_ENGINE_SINGLETON+ENGINE_VCF_ENVELOPE_OFFSET
+        MOVB AL,#1
+        LCR envelope_set_gate
+feature_vcf_gate_done:
+        LRETR
+_feature_vcf_gate_off:
+        MOVL XAR4,#SYNTH_ENGINE_SINGLETON
+        MOVW DP,#CONTROL_ENVELOPE_HELD_MODE_DP
+        MOV AL,@CONTROL_ENVELOPE_HELD_MODE_DIRECT
+        MOVL XAR0,#ENGINE_CONTROL_UPDATE_INHIBIT
+        OR AL,*+XAR4[AR0]
+        SB feature_vcf_gate_off_done,NEQ
+        MOVL XAR4,#SYNTH_ENGINE_SINGLETON+ENGINE_VCF_ENVELOPE_OFFSET
+        MOVB AL,#0
+        LCR envelope_set_gate
+feature_vcf_gate_off_done:
         LRETR
 
         .ref _feature_service, _feature_assignment_edge
@@ -242,13 +324,10 @@ feature_cc_hook:
         CMPB AL,#117
         SB feature_cc_extension,EQ
         CMPB AL,#80
-        SB feature_cc_extension,EQ
-        CMPB AL,#81
-        SB feature_cc_extension,EQ
-        CMPB AL,#82
-        SB feature_cc_extension,EQ
-        CMPB AL,#83
-        SB feature_cc_extension,EQ
+        SB feature_cc_outside_routing,LO
+        CMPB AL,#89
+        SB feature_cc_extension,LOS
+feature_cc_outside_routing:
         CMPB AL,#114
         SB feature_cc_extension,EQ
         CMPB AL,#115

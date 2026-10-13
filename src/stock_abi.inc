@@ -3,6 +3,8 @@ ADCA_INTFLGCLR                                       .set 0x7404
 ADCA_SOCFRC1                                         .set 0x740d
 ADC_INT2_ENABLE_BIT                                  .set 0x2000
 CONTROL_14BIT_TO_UNIT_F32_HI                         .set 0x3880
+CONTROL_ENVELOPE_HELD_MODE_DIRECT                    .set 0x27
+CONTROL_ENVELOPE_HELD_MODE_DP                        .set 0x038a
 CONTROL_OUTPUT_OVERRIDE_OFFSET                       .set 0x8
 CONTROL_STATE_RHYTHM_SNAPSHOT_OFFSET                 .set 0x80
 CONTROL_STATE_SINGLETON                              .set 0xd580
@@ -77,7 +79,10 @@ MIDI_DEVICE_ID_DIRECT                                .set 0x3c
 MIDI_DISPATCH_CONTEXT_SINGLETON                      .set 0xc300
 MIDI_CONTROL_SOURCE_DP                               .set 0x030a
 MIDI_CONTROL_SOURCE_NOTE_DIRECT                      .set 0x38
+MIDI_INPUT_CHANNEL_DIRECT                            .set 0x06
+MIDI_INPUT_CHANNEL_OMNI                              .set 0x10
 MIDI_INPUT_CONFIG_DP                                 .set 0x030f
+MIDI_MESSAGE_STATUS_OFFSET                           .set 0x0c
 MIDI_NOTE_MANAGER_SINGLETON                          .set 0xc040
 MIDI_SYSEX_BROADCAST_DEVICE_ID                       .set 0x7f
 MIDI_SYSEX_CAPTURE_COUNT_OFFSET                      .set 0x1a
@@ -123,6 +128,7 @@ VCO_SUBDIVISION_STATE_PTR_DP                         .set 0x3e0
         .ref epwm_pair_set_raw_compare
         .ref feature_cc_low_continue
         .ref feature_manager_reset_continue
+        .ref feature_note_filter_continue
         .ref feature_note_running_continue
         .ref feature_remove_finish
         .ref gpio_set_pin_config

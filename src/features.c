@@ -21,6 +21,8 @@ extern void feature_stock_refresh(void);
 extern void feature_clear_notes(void);
 extern void feature_gate_on(void);
 extern void feature_gate_off(void);
+extern void feature_vcf_gate_on(void);
+extern void feature_vcf_gate_off(void);
 extern void feature_close_gates(void);
 extern uint32_t feature_micros(void);
 extern void feature_save_config(void);
@@ -53,12 +55,22 @@ extern uint16_t feature_fast_load, feature_fast_run, feature_fast_size;
 #pragma DATA_SECTION(feature_velocity_depth, ".feature_velocity_state")
 #pragma DATA_SECTION(feature_velocity_last, ".feature_velocity_state")
 volatile uint16_t feature_velocity_depth, feature_velocity_last;
+/* Read by the MIDI gate bridge; live panel edits apply before the next note. */
+#pragma DATA_SECTION(feature_midi_vcf, ".feature_settings_state")
+volatile uint16_t feature_midi_vcf;
+#pragma DATA_SECTION(feature_vcf_notes, ".feature_settings_state")
+static volatile uint16_t feature_vcf_notes[128];
+#pragma DATA_SECTION(feature_vcf_count, ".feature_settings_state")
+static uint16_t feature_vcf_count;
+#pragma DATA_SECTION(feature_vcf_channel, ".feature_settings_state")
+static uint16_t feature_vcf_channel;
 struct FeatureSettings {
     uint32_t last_activity;
     uint16_t active, draining, page, fine, dirty;
-    uint16_t edited[8], recall[7];
+    uint16_t edited[9], recall[8];
     struct PanelChord chord;
     uint16_t captured, saved[2];
+    uint16_t assignment_pending, assignment[6];
 
 };
 #pragma DATA_SECTION(feature_settings, ".feature_settings_state")
@@ -363,9 +375,18 @@ float feature_vca_velocity(float inverted)
     return velocity_vca(inverted,feature_velocity_depth,feature_velocity_last);
 }
 
+static void feature_vcf_reset(void)
+{
+    uint16_t i;
+    for(i=0;i<128;++i) feature_vcf_notes[i]=0;
+    if(feature_vcf_count) feature_vcf_gate_off();
+    feature_vcf_count=0;
+}
+
 void feature_notes_reset(void)
 {
     uint16_t irq=__disable_interrupts();
+    feature_vcf_reset();
     feature_glide.snap_mask=63;
     feature_glide.tied_mask=0;
     feature_glide.active_mask=0;
@@ -375,6 +396,26 @@ void feature_notes_reset(void)
     feature_state.midi_gate=0;
     __restore_interrupts(irq);
     feature_close_gates(); /* Explicit All Notes/Sound Off overrides Held. */
+}
+
+/* The stock note dispatcher has already admitted the physical source. Its
+ * channel filter calls this first; only adjacent-channel notes are consumed. */
+uint16_t feature_midi_vcf_note(const volatile uint16_t *message)
+{
+    uint16_t base=REG16(0xc3c6UL),status=message[0x0c],note=message[0x0d];
+    uint16_t type=status&0xf0;
+    if(!feature_midi_vcf || base>=16 || (status&15)!=((base+1)&15) || note>127)
+        return 0;
+    if(type!=0x80 && type!=0x90) return 0;
+    if(type==0x90 && message[0x0e]) {
+        if(!feature_vcf_notes[note]) {
+            if(!feature_vcf_count++) feature_vcf_gate_on();
+        }
+        if(feature_vcf_notes[note]!=0xffffU) ++feature_vcf_notes[note];
+    } else if(feature_vcf_notes[note]) {
+        if(!--feature_vcf_notes[note] && !--feature_vcf_count) feature_vcf_gate_off();
+    }
+    return 1;
 }
 
 static uint16_t feature_midi_interval(uint16_t slot)
@@ -798,13 +839,67 @@ static void feature_restore_assignment_leds(void)
                             REG16(CONTROLS+assignments[i]));
 }
 
+/* CC84..89 replace complete routing masks. Apply from foreground so LED
+ * writes never run inside the pitch ISR. Stock adjustment/calibration modes
+ * borrow these flags; retain the latest request until their restore completes.
+ */
+static void feature_apply_assignments(void)
+{
+    uint16_t lane,i,value,irq;
+    if(!feature_settings.assignment_pending || REG16(ENGINE+0xafc) ||
+       REG16(0xc4dcUL) || REG16(0xf686UL) || REG16(0xc4c9UL)) return;
+    for(lane=0;lane<6;++lane) {
+        if(!(feature_settings.assignment_pending&(1U<<lane))) continue;
+        value=feature_settings.assignment[lane];
+        irq=__disable_interrupts();
+        if(lane<4) {
+            /* ENGINE+0xaf0 is also the panel's routing word at 0xee70. */
+            REG16(ENGINE+0xaf0+lane)=value;
+            REG16(0xc3cdUL+lane)=value&1;
+            REG16(0xc3d1UL+lane)=(value>>1)&1;
+        } else {
+            uint16_t first=(lane-4)*3;
+            for(i=0;i<3;++i) {
+                uint16_t on=(value>>i)&1;
+                REG16(CONTROLS+assign_offset[first+i])=on;
+                REG16(0xc3d5UL+first+i)=on;
+            }
+            /* A held settings-entry chord must not restore an older route. */
+            if(lane==4) {
+                feature_settings.saved[0]=(value>>1)&1;
+                feature_settings.saved[1]=(value>>2)&1;
+            }
+            feature_state.dirty=1;
+        }
+        feature_settings.assignment_pending&=~(1U<<lane);
+        __restore_interrupts(irq);
+        /* Settings owns these six LEDs until exit; normal rhythm LEDs are
+         * redrawn by the existing panel service from the same routing words. */
+        if(lane>=4 && !feature_settings.active)
+            for(i=0;i<3;++i)
+                feature_setting_led((volatile uint16_t *)(CONTROLS+0xaca+0x22*((lane-4)*3+i)),
+                                    (value>>i)&1);
+    }
+}
+
 /* Runs before foreground dequeue, when no MIDI payload is in flight. Heap
  * cleanup and mode changes never run from the timer interrupt. */
 void feature_service(void)
 {
+    uint16_t channel=REG16(0xc3c6UL);
+    if(channel!=feature_vcf_channel) {
+        feature_vcf_reset();
+        feature_vcf_channel=channel;
+    }
     if(feature_state.config_pending) {
         uint16_t i;
         feature_state.config_pending=0;
+        /* The stock CLA graph has been constructed before foreground starts.
+         * Slots 2/3 are VCF/VCA envelopes; +0x0e is the slew fraction. A
+         * fraction of one reaches each new target on the next 25-us CLA tick.
+         * Keep pitch/sequence output smoothing and the envelope laws intact. */
+        *(volatile float *)(0x8040UL+2*0x1aUL+0x0eUL)=1.0f;
+        *(volatile float *)(0x8040UL+3*0x1aUL+0x0eUL)=1.0f;
         feature_set_enabled(0);
         feature_noise_only=0;feature_state.reset.noise=0;
         feature_set_pitch_controls(0);
@@ -819,8 +914,10 @@ void feature_service(void)
         feature_setting(9,feature_state.persisted.rhythm,0);
         feature_setting(8,feature_state.persisted.mode,0);
         feature_setting(10,feature_state.persisted.noise,0);
+        feature_setting(11,feature_state.persisted.midi_vcf,0);
     }
     if(feature_state.fault && feature_state.enabled) feature_set_enabled(0);
+    feature_apply_assignments();
     feature_settings_gesture();
 }
 
@@ -836,8 +933,8 @@ static void feature_set_quantize(uint16_t q)
     feature_state.dirty=1;
 }
 
-/* Version 9 occupies 0x55..0x5e of the 128-word control image. Only this
- * format is accepted; loading never writes the image. */
+/* Versions 9/10 occupy 0x55..0x5e of the 128-word control image. Loading
+ * never writes the image; the next panel or SysEx save writes version 10. */
 #define FEATURE_CONFIG_STAGED (0xc300UL+0xb8UL+0x55UL)
 void feature_config_load(void)
 {
@@ -902,6 +999,9 @@ static uint16_t feature_setting(uint16_t id, uint16_t value, uint16_t persist)
         }
     } else if(id==9) {
         feature_rhythm_type=value;
+    } else if(id==11) {
+        if(feature_midi_vcf!=value) feature_vcf_reset();
+        feature_midi_vcf=value;
     } else if(id==7) {
         feature_velocity_depth=value;
     } else {
@@ -917,6 +1017,7 @@ static uint16_t feature_setting(uint16_t id, uint16_t value, uint16_t persist)
         else if(id==8) feature_state.persisted.mode=value;
         else if(id==9) feature_state.persisted.rhythm=value;
         else if(id==10) feature_state.persisted.noise=value;
+        else if(id==11) feature_state.persisted.midi_vcf=value;
         feature_config_encode((volatile uint16_t *)FEATURE_CONFIG_STAGED,&feature_state.persisted);
         feature_save_config();
     }
@@ -936,9 +1037,13 @@ void feature_cc(uint16_t controller, uint16_t value)
 {
     /* These channel messages have passed the stock source/channel filters. */
     if(controller>=80 && controller<=83) feature_rhythm_cc(controller-80,value);
+    else if(controller>=84 && controller<=89) {
+        feature_settings.assignment[controller-84]=value>>(controller<88 ? 5 : 4);
+        feature_settings.assignment_pending|=1U<<(controller-84);
+    }
     else if(controller==112) feature_setting(3,value,0);
-    else if(controller==116) feature_setting(4,value==0 ? 0 : (value<64 ? 1 : 2),0);
-    else if(controller==114) feature_setting(8,value,0);
+    else if(controller==116) feature_setting(4,value<64 ? 1 : 2,0);
+    else if(controller==114) feature_setting(8,value>>5,0);
     else if(controller==117) feature_setting(10,value>=64,0);
     else if(controller==115) feature_setting(9,value>=64,0);
     else if(controller==111) feature_setting(7,value,0);
@@ -1000,7 +1105,8 @@ void feature_init(void)
     for(i=0;i<sizeof(feature_settings);++i) words[i]=0;
     words=(volatile uint16_t *)&feature_harmony;
     for(i=0;i<sizeof(feature_harmony);++i) words[i]=0;
-    feature_noise_only=0;
+    feature_noise_only=0;feature_midi_vcf=0;feature_vcf_count=0;feature_vcf_channel=16;
+    for(i=0;i<128;++i) feature_vcf_notes[i]=0;
     feature_harmony.root=60.0f;
     feature_rhythm_init();
     feature_velocity_depth=0; feature_velocity_last=127;
@@ -1017,7 +1123,7 @@ static const uint16_t settings_buttons[20]={
     0x646,0x558,0x57a,0x624,0x5be,0x756, /* EG, NEXT, RESET, OCT, PLAY, QUANTIZE */
     0x536,0x514,0x4f2,0x4d0,0x6ce,0x6ac,0x68a,0x668
 };
-static const uint16_t settings_ids[7]={3,5,7,8,9,10,4};
+static const uint16_t settings_ids[8]={3,5,7,8,9,10,4,11};
 static uint16_t feature_settings_gesture(void)
 {
     uint16_t i,down=0,other=0;
@@ -1053,6 +1159,7 @@ static uint16_t feature_setting_value(uint16_t id)
     if(id==8) return feature_state.reset.morph ? 3 : (feature_harmony.enabled ? 2 : feature_state.allocation);
     if(id==9) return feature_rhythm_type;
     if(id==10) return feature_state.reset.noise;
+    if(id==11) return feature_midi_vcf;
     return 0;
 }
 static void feature_settings_open(void)
@@ -1061,7 +1168,7 @@ static void feature_settings_open(void)
     feature_settings.active=1; feature_settings.draining=2;
     feature_settings.page=0; feature_settings.fine=0; feature_settings.dirty=0;
     feature_settings.last_activity=feature_micros();
-    for(i=0;i<7;++i) {
+    for(i=0;i<8;++i) {
         uint16_t value=feature_setting_value(settings_ids[i]);
         feature_settings.recall[i]=value ? value : (i==2 ? 64 : (i==6 ? 2 : 1));
     }
@@ -1107,6 +1214,7 @@ uint16_t feature_settings_gate(void)
             feature_settings.active=0; feature_settings.draining=0;
             feature_settings.captured=0; feature_settings.chord.timing=0; feature_settings.chord.latched=0;
             feature_restore_assignment_leds();
+            feature_setting_led((volatile uint16_t *)(CONTROLS+0x910),REG16(ENGINE+0xaf0)&1);
             for(i=0;i<8;++i)
                 feature_setting_led((volatile uint16_t *)(CONTROLS+0x800+0x22*i),
                                     (i&3)==REG16(ENGINE+0xaf4+(i>>2)));
@@ -1118,6 +1226,7 @@ uint16_t feature_settings_gate(void)
         else {
             for(i=0;i<6;++i) if(edge&(1UL<<i)) feature_settings.page=i;
             if(edge&(1UL<<11)) feature_settings.page=6;
+            if(edge&(1UL<<12)) feature_settings.page=7;
             if(edge&(1UL<<9)) feature_settings.fine=!feature_settings.fine;
             id=settings_ids[feature_settings.page]; value=feature_setting_value(id);
             if(edge&(1UL<<6)) {
@@ -1131,7 +1240,7 @@ uint16_t feature_settings_gate(void)
                 uint16_t step=feature_settings.fine ? 1 : 16,maximum=127;
                 if(feature_settings.page==1) id=6;
                 else if(feature_settings.page==3) { step=1;maximum=3; }
-                else if(feature_settings.page==4 || feature_settings.page==5) { step=1;maximum=1; }
+                else if(feature_settings.page==4 || feature_settings.page==5 || feature_settings.page==7) { step=1;maximum=1; }
                 else if(feature_settings.page==6) { step=1;maximum=2; }
                 if(id==6) value=glide_panel_adjust(feature_glide.time,feature_settings.fine,(edge&(1UL<<7))!=0);
                 else value=panel_adjust(feature_setting_value(id),step,maximum,(edge&(1UL<<7))!=0);
@@ -1148,10 +1257,12 @@ uint16_t feature_settings_gate(void)
     for(i=0;i<4;++i)
         feature_setting_led((volatile uint16_t *)(CONTROLS+0xb96+0x22*i),
                             feature_settings.page==6 && (now%500000UL)<250000UL);
+    feature_setting_led((volatile uint16_t *)(CONTROLS+0x910),
+                        feature_settings.page==7 ? (now%500000UL)<250000UL : (REG16(ENGINE+0xaf0)&1));
     id=feature_settings.page==1 ? 6 : settings_ids[feature_settings.page];
     value=feature_setting_value(id);
     if(id==8) value=value ? 1+32*(value-1) : 0;
-    else if(id==9 || id==10) value*=127;
+    else if(id==9 || id==10 || id==11) value*=127;
     else if(id==4) value=value==1 ? 32 : 127;
     for(i=0;i<8;++i)
         feature_setting_led((volatile uint16_t *)(CONTROLS+0x800+0x22*i),

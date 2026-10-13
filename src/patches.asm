@@ -124,6 +124,12 @@
         .sect ".patch_08b1a6"
         .retain
         LB feature_remove_continue_hook
+        .sect ".patch_08b15b"
+        .retain
+        LCR feature_midi_gate_off
+        .sect ".patch_08b17d"
+        .retain
+        LCR feature_midi_gate_on
         .sect ".patch_08b1bd"
         .retain
         LCR feature_note_removed_hook
@@ -134,6 +140,10 @@
         .retain
         LB feature_note_route_hook
         NOP
+        NOP
+        .sect ".patch_08b29b"
+        .retain
+        LB feature_note_channel_hook
         NOP
         .sect ".patch_08b2bd"
         .retain
