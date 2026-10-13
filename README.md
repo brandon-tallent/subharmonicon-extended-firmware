@@ -30,17 +30,6 @@ Your firmware stays in your browser; nothing is uploaded. To use the patcher
 offline, click **Save this tool for offline use** on the page, then open the
 downloaded HTML file in a current browser.
 
-### CLI alternative
-
-Download `subharmonicon.subhpatch` from the
-[latest release](https://github.com/brandon-tallent/subharmonicon-extended-firmware/releases/latest)
-and run this command from a copy of this repository:
-
-```sh
-python3 patcher.py /path/to/Subharmonicon_Firmware_v1_1_1.syx \
-  subharmonicon.subhpatch -o subharmonicon-tallent-edition.syx
-```
-
 ## Building from source
 
 - Download the official firmware as described above
@@ -61,6 +50,9 @@ Build the firmware patch.
 ```sh
 make release C2000_CGT_ROOT=/path/to/ti-cgt-c2000_25.11.1.LTS
 ```
+
+This writes `dist/subharmonicon-patcher.html`, the patcher page with your build
+inside it. Open it in a browser and use it as above.
 
 ## File layout
 
