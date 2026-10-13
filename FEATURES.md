@@ -1,4 +1,5 @@
-# Optional firmware: panel quick reference
+# Tallent Edition features
+
 
 The four rhythm knobs select 32 patterns spanning 64 sixteenth steps. 
 The left pair advances pitches; the right pair triggers 
@@ -22,32 +23,19 @@ In **Gate Patterns**, default routing when no valid saved assignments exist:
 | RHYTHM 4 | VCF envelope accents | Lower (now VCF) |
 
 RHYTHM 1/2's upper/lower buttons still route to SEQ1/SEQ2. RHYTHM 3/4's
-upper/lower buttons now route to VCA/VCF. Either pattern can feed both of its
-pair's destinations or neither. Matching hits combine with OR; CC113's XOR
-selection has no effect in this mode. Oscillator-assignment buttons keep their
-pitch meaning. Pitch advances alone never trigger either envelope.
+upper/lower buttons now route to VCA/VCF. Matching hits combine with OR; CC113's XOR
+selection has no effect in this mode.
 
-All patterns share a four-bar phrase (64 sixteenths), with a finer 24-PPQN
-clock for MIDI synchronization. RESET returns the phrase and both pitch
-sequences to their start; the first hit presents step 1 before advancing on
-later hits. PLAY pauses/resumes the phrase. NEXT advances both pitch sequences
-once without moving the phrase or triggering envelopes, even with silent patterns.
+All patterns share a four-bar phrase (64 sixteenths), RESET returns the phrase and both pitch
+sequences to their start. NEXT advances both pitch sequences
+once without moving the phrase or triggering envelopes.
 Holding RESET retains the stock selected-step override.
-In independent-pitch mode the musical clock follows elapsed hardware time,
-including time spent processing oscillator changes. Adding pitch assignments
-must not change tempo. Hot pitch calculations run from the reserved fast RAM.
 
-TEMPO spans 40–239 BPM (noon 140). Internal pattern ticks and MIDI sync run
-at 24 PPQN. **Each physical CLOCK rising edge advances one sixteenth step**
-in Gate Patterns (64 edges per phrase), or one divider count in Stock rhythm
-mode. CLOCK OUT follows each accepted physical edge while playing; with
-internal/MIDI clock it remains sixteenths (4 PPQN). SEQ1/2 CLK outputs follow their pitch
-lanes; TRIGGER OUT follows VCA-pattern hits.
+TRIGGER OUT follows VCA-pattern hits.
 Manual TRIGGER, TRIGGER input, and MIDI keyboard gates still address both
 envelopes. 
 
-Pattern order, counterclockwise to clockwise. Numbers are zero-based selector
-bins, not panel markings. `x` = hit, `.` = rest; each group is one beat, with
+Pattern order, counterclockwise to clockwise. `x` = hit, `.` = rest; each group is one beat, with
 `/` separating bars within each two-bar half. Every hit lies on the sixteenth grid.
 
 | Bin | Pattern | Bars 1–2 | Bars 3–4 |
@@ -104,7 +92,7 @@ Internal/MIDI clock uses 24 PPQN and publishes sixteenth CLOCK OUT pulses.
 RESET clears both divider and pattern phase. Switching type retains phrase
 position and the stored divider counters; use RESET for a fresh start.
 
-**CC80–83** control R1–R4 in every mode and rhythm type. In Gate Patterns,
+**CC80–83** control R1–R4. In Gate Patterns,
 `bin = value >> 2`: values 0–3 select bin 0, 4–7 select bin 1, …, 124–127
 select bin 31. In Stock, `divisor = 16 - (value >> 3)` before patch CV.
 Moving the physical knob at least 16 ADC counts takes ownership back.
@@ -112,7 +100,7 @@ Stock bipolar CV still adds to the selected knob/MIDI value before clamping.
 A CC changes only its lane's selection, preserving phase and assignments.
 These selections are volatile; after reboot the physical knobs select rhythms.
 
-## Optional pitch and MIDI settings
+##  pitch and MIDI settings
 
 With PLAY stopped, hold **SEQ 1 SUB1 + SUB2 for one second**, then release.
 
